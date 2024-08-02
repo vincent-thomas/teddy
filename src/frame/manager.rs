@@ -2,37 +2,36 @@ use crossterm::event::KeyEvent;
 
 use super::Frame;
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 struct Cursor {
-    position: (usize, usize)
+  position: (usize, usize),
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct FrameManager {
-    // Attached lSPs here
-    frames: Vec<Frame>,
-    active_frame: usize,
-    cursor_manager: Cursor,
+  frames: Vec<Frame>,
+  active_frame: usize,
+  cursor_manager: Cursor,
 }
 
 impl FrameManager {
-    pub fn new() -> Self {
-        FrameManager {
-            frames: vec![Frame::new()],
-            active_frame: 0,
-            cursor_manager: Cursor::default()
-        }
-    }
+  pub fn new() -> Self {
+    FrameManager { frames: vec![Frame::new()], active_frame: 0, cursor_manager: Cursor::default() }
+  }
 
-    pub fn send_input(&mut self, _key: KeyEvent) {
-        println!("Sending input {}", _key.code);
-    }
+  pub fn add_frame(&mut self, frame: Frame) {
+    self.frames.push(frame);
+  }
 
-    pub fn cursor_position(&self) -> (usize, usize) {
-        self.cursor_manager.position
-    }
+  pub fn send_input(&mut self, _key: KeyEvent) {
+    println!("Sending input {}", _key.code);
+  }
 
-    pub fn render(&self) {
-        //println!("rendering");
-    }
+  pub fn cursor_position(&self) -> (usize, usize) {
+    self.cursor_manager.position
+  }
+
+  pub fn render(&self) {
+    //println!("rendering");
+  }
 }

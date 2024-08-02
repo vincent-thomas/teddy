@@ -1,7 +1,8 @@
+use clier_parser::Argv;
 use crossterm::event::KeyEvent;
-use std::error::Error;
+use std::{error::Error, path::Path};
 
-use crate::{editor::Editor, Config};
+use crate::{config::Config, editor::Editor};
 
 pub struct Application {
   configuration: Config,
@@ -19,21 +20,13 @@ impl Application {
   }
 
   pub async fn start(&mut self) -> Result<(), Box<dyn Error>> {
-    self.editor.start().await
+    let args = Argv::parse();
+
+    let file_may = args.commands.first();
+
+    let optional_path = file_may.map(|raw_str| Path::new(raw_str).into());
+    self.editor.start(optional_path).await
   }
 
   fn render(&self) {}
 }
-
-// #[derive(Debug)]
-// struct KeyBind {
-//     key: KeyCode,
-//     modifiers: KeyModifiers,
-// }
-//
-// #[derive(Debug)]
-// enum Action {
-//     RequestModeSwitch(EditorMode),
-//     BindingAttempt(KeyBind),
-//     Key(char)
-// }

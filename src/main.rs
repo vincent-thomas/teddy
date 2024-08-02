@@ -1,9 +1,11 @@
 #![allow(dead_code)]
+#![allow(clippy::module_inception)]
 mod application;
+mod buffer;
+pub mod config;
+pub mod editor;
 mod frame;
 mod keycapture;
-//mod state;
-pub mod editor;
 
 use std::error::Error;
 
@@ -13,11 +15,6 @@ use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 #[derive(Default)]
 struct RawBuffer {
   data: Vec<u8>,
-}
-
-#[derive(Default)]
-struct Config {
-  leader_key: String,
 }
 
 #[tokio::main]
