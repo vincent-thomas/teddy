@@ -1,26 +1,55 @@
 {
-  description = "editor";
+  description = "Editor description";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05";
-    flake-utils.url = "github:numtide/flake-utils";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    rust-overlay.url = "github:oxalica/rust-overlay";
+    flake-utils = {
+      url = "github:numtide/flake-utils";
+      inputs.nixpkgs.follows = "nixkgs";
+    };
   };
 
-  outputs = { nixpkgs, flake-utils }: let 
-  in flake-utils.lib.eachDefaultSystem (system: let
-    pkgs = import nixpkgs {
-      inherit system;
-    };
-   in {
-    devShells.default = pkgs.mkShell {
-      buildInputs = [
-        pkgs.cargo
-        pkgs.bacon
-      ];
+  outputs = {
+    self,
+    nixpkgs,
+    rust-overlay,
+    flake-utils,
+    ...
+  }:
+    flake-utils.lib.eachDefaultSystem (
+      system: let
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [
+            (import rust-overlay)
+          ];
+        };
+      in {
+        devShell = pkgs.mkShell {
+          nativeBuildInputs = with pkgs; [
+            (rust-bin.stable.latest.default.override {
+                  extensions = [ "rust-src" "cargo" "rustc" ];
+            })
+            gcc
+          ];
 
-      shellHook = ''
-        export RUST_SRC_PATH="$(rustc --print sysroot)/lib/rustlib/src/rust/src"
-      '';
-    };
-  });
+          RUST_SRC_PATH = "${pkgs.rust-bin.stable.latest.default.override {
+              extensions = [ "rust-src" ];
+          }}/lib/rustlib/src/rust/library";
+
+
+          buildInputs = with pkgs; [
+            openssl.dev
+            glib.dev
+            pkg-config
+
+            clippy
+            rust-analyzer
+            just
+          ];
+        };
+      }
+    );
 }
+

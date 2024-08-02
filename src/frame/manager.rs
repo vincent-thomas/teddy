@@ -31,4 +31,8 @@ impl FrameManager {
     pub fn cursor_position(&self) -> (usize, usize) {
         self.cursor_manager.position
     }
+
+    pub fn render(&self) {
+        //println!("rendering");
+    }
 }

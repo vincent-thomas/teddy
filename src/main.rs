@@ -1,7 +1,7 @@
 mod keycapture;
 mod frame;
 mod application;
-mod state;
+//mod state;
 pub mod editor;
 
 use application::Application;

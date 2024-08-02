@@ -1,8 +1,7 @@
-use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
-use std::{sync::mpsc, thread, error::Error};
-use thiserror::Error;
+use crossterm::event::KeyEvent;
+use std::error::Error;
 
-use crate::{editor::Editor, frame::manager::FrameManager, keycapture::KeyCaptureManager, state::{CommandToExecute, EditorMode, State}, Config};
+use crate::{editor::Editor, Config};
 
 pub struct Application {
     configuration: Config,
@@ -29,15 +28,15 @@ impl Application {
     fn render(&self) {}
 }
 
-#[derive(Debug)]
-struct KeyBind {
-    key: KeyCode,
-    modifiers: KeyModifiers,
-}
-
-#[derive(Debug)]
-enum Action {
-    RequestModeSwitch(EditorMode),
-    BindingAttempt(KeyBind),
-    Key(char)
-}
+// #[derive(Debug)]
+// struct KeyBind {
+//     key: KeyCode,
+//     modifiers: KeyModifiers,
+// }
+//
+// #[derive(Debug)]
+// enum Action {
+//     RequestModeSwitch(EditorMode),
+//     BindingAttempt(KeyBind),
+//     Key(char)
+// }
