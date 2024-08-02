@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-# tokio = { version = "*", features = ["sync", "rt", "macros", "rt-multi-thread"]}
+tokio = { version = "*", features = ["sync", "rt", "macros", "rt-multi-thread"]}
 crossterm = { version = "*", features = ["serde"]}
 mio = {version = "*", features = ["os-poll", "os-ext"]}
 thiserror = "1.0.63"
