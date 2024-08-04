@@ -60,6 +60,7 @@ impl FrameManager {
 
   fn active_frame_mut(&mut self) -> Option<&mut Frame> {
     match self.active_frame {
+      // FIXME: This is a bug somewhere
       Some(frame) => Some(self.frames.get_mut(&frame).unwrap()),
       None => None,
     }

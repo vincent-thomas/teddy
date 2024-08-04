@@ -8,13 +8,13 @@ use ratatui::{backend::CrosstermBackend, Terminal};
 
 pub type Tui = Terminal<CrosstermBackend<Stdout>>;
 
-pub fn init() -> io::Result<Tui> {
+pub fn init() -> io::Result<CrosstermBackend<Stdout>> {
   execute!(io::stdout(), EnterAlternateScreen)?;
   enable_raw_mode()?;
 
-  let backend = CrosstermBackend::new(stdout());
+  Ok(CrosstermBackend::new(stdout()))
 
-  Terminal::new(backend)
+  //Terminal::new(backend)
 }
 
 pub fn restore() -> io::Result<()> {

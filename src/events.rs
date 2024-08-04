@@ -1,21 +1,22 @@
 use crossterm::event::{Event as CrosstermEvent, EventStream, MouseEventKind};
 use futures::{Stream, StreamExt};
-use std::{io, pin::Pin};
-use tokio_stream::StreamMap;
+use std::{io, pin::Pin, time::Duration};
+use tokio::time::interval;
+use tokio_stream::{wrappers::IntervalStream, StreamMap};
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 pub enum StreamName {
   CrossTerm,
-  Ticks,
+  Renders,
   Render,
 }
 
 #[derive(Debug)]
 pub enum Event {
-  Quit,
+  Render,
   Crossterm(CrosstermEvent),
 
-  LSPError, // TODO,
+  //LSPError, // TODO,
   EventStreamError(io::Error),
 }
 
@@ -25,7 +26,10 @@ pub struct Events {
 
 impl Events {
   pub fn new() -> Self {
-    let streams = StreamMap::from_iter([(StreamName::CrossTerm, crossterm_stream())]);
+    let streams = StreamMap::from_iter([
+      (StreamName::CrossTerm, crossterm_stream()),
+      (StreamName::Renders, render_stream()),
+    ]);
     Events { streams }
   }
 
@@ -34,9 +38,16 @@ impl Events {
   }
 }
 
+fn render_stream() -> Pin<Box<dyn Stream<Item = Event>>> {
+  let interval = interval(Duration::from_millis(100));
+  let stream = IntervalStream::new(interval).map(|_| Event::Render);
+  Box::pin(stream)
+}
+
 fn crossterm_stream() -> Pin<Box<dyn Stream<Item = Event>>> {
   use crossterm::event::{Event as CrosstermEvent, KeyEventKind};
-  Box::pin(EventStream::new().fuse().filter_map(|event| async move {
+
+  let stream = EventStream::new().fuse().filter_map(|event| async move {
     let crossterm_event = match event {
       Ok(real_event) => real_event,
       Err(err) => return Some(Event::EventStreamError(err)),
@@ -48,7 +59,10 @@ fn crossterm_stream() -> Pin<Box<dyn Stream<Item = Event>>> {
 
       CrosstermEvent::Mouse(mouse) if matches!(mouse.kind, MouseEventKind::Up(_)) => None,
       CrosstermEvent::Mouse(_) => Some(Event::Crossterm(crossterm_event)),
+      CrosstermEvent::Resize(x, y) => Some(Event::Crossterm(CrosstermEvent::Resize(x, y))),
       _ => None,
     }
-  }))
+  });
+
+  Box::pin(stream)
 }

@@ -1,9 +1,11 @@
-use std::{error::Error, io, path::Path};
+use std::{error::Error, io::Stdout, path::Path};
 
 use clier_parser::Argv;
 use ratatui::{
   layout::{Constraint, Direction, Layout},
-  widgets::{Block, Borders, Paragraph},
+  prelude::CrosstermBackend,
+  widgets::{Block, Paragraph},
+  Terminal,
 };
 use tokio::sync::mpsc;
 
@@ -26,11 +28,13 @@ pub struct Application {
   editor: Editor,
 
   should_quit: bool,
+
+  terminal: Tui,
 }
 
 impl Application {
   #[tracing::instrument(name = "Application::new")]
-  pub fn new() -> Self {
+  pub fn new(tui: CrosstermBackend<Stdout>) -> Self {
     tracing::info!("Initiating application");
 
     let (sender, receiver) = mpsc::unbounded_channel();
@@ -40,6 +44,7 @@ impl Application {
       action_sender: sender,
       editor: Editor::new(),
       should_quit: false,
+      terminal: Terminal::new(tui).unwrap(),
     }
   }
 
@@ -61,12 +66,12 @@ impl Application {
     Ok(())
   }
 
-  pub async fn run(&mut self, mut tui: Tui, mut events: Events) -> Result<(), Box<dyn Error>> {
+  pub async fn run(&mut self, mut events: Events) -> Result<(), Box<dyn Error>> {
     loop {
       // Executing action part of event loop
       while let Ok(action) = self.action_receiver.try_recv() {
         tracing::trace!("action {:?}", &action);
-        self.handle_action(action, &mut tui)?;
+        self.handle_action(action)?;
       }
 
       if self.should_quit {
@@ -76,11 +81,11 @@ impl Application {
       // Rendering the application
       // This is done after handling the action to ensure the UI is updated
       // Also after the quitting because of its useless.
-      self.render(&mut tui)?;
+      //self.render(&mut tui)?;
 
       // Check for any events part of event loop
       if let Some(event) = events.next().await {
-        tracing::info!("received_event: {:?}", event);
+        //tracing::info!("received_event: {:?}", event);
 
         let action = self.handle_event(event).await?;
 
@@ -100,22 +105,21 @@ impl Application {
 
   async fn handle_event(&mut self, event: Event) -> Result<Option<Action>, Box<dyn Error>> {
     let output = match event {
-      Event::Quit => Some(Action::Quit),
-
+      //Event::Quit => Some(Action::Quit),
+      Event::Render => self.render().map(|_| None)?,
       Event::Crossterm(crossterm::event::Event::Key(key)) => self.handle_keypress(key)?,
       Event::Crossterm(crossterm::event::Event::Resize(x, y)) => Some(Action::Resize(x, y)),
       // For now
-      Event::Crossterm(_) => None,
 
       //Event::SendNotification(error) => Some(Action::AttachNotification(error)),
       Event::EventStreamError(err) => {
         // TODO: For now
         panic!("EventStreamError: {:?}", err);
-      }
-      Event::LSPError => Some(Action::AttachNotification(Notification::new(
-        NotificationLevel::Error,
-        "LSP: error".into(),
-      ))),
+      } // Event::LSPError => Some(Action::AttachNotification(Notification::new(
+      //   NotificationLevel::Error,
+      //   "LSP: error".into(),
+      // ))),
+      _ => unimplemented!(),
     };
 
     Ok(output)
@@ -141,7 +145,7 @@ impl Application {
     //Ok(output)
   }
 
-  fn handle_action(&mut self, action: Action, tui: &mut Tui) -> Result<(), Box<dyn Error>> {
+  fn handle_action(&mut self, action: Action) -> Result<(), Box<dyn Error>> {
     match action {
       Action::Quit => {
         self.should_quit = true;
@@ -150,12 +154,10 @@ impl Application {
         self.editor.open_buffer(component)?;
       }
       Action::ReplaceActiveBuffer(buffer) => {
-        self.editor.replace_active_buffer(buffer);
+        self.editor.replace_active_buffer(buffer)?;
       }
-      // Action::CloseBuffer { buffer_id } => {
-      //   self.editor.remove_buffer(buffer_id)?;
-      // }
-      Action::Resize(_x, _y) => self.render(tui)?,
+      Action::Resize(_x, _y) => self.render()?,
+      Action::CloseActiveBuffer => self.editor.remove_active_buffer()?,
       _ => unimplemented!(),
     };
     Ok(())
@@ -163,10 +165,8 @@ impl Application {
 
   // Render the `AppWidget` as a stateful widget using `self` as the `State`
   #[tracing::instrument(name = "Application::render", skip_all)]
-  fn render(&mut self, tui: &mut Tui) -> Result<(), Box<dyn Error>> {
-    tracing::trace!("Rendering");
-    tui.draw(|frame| {
-      tracing::trace!("drawing");
+  fn render(&mut self) -> Result<(), Box<dyn Error>> {
+    self.terminal.draw(|frame| {
       let layout = Layout::default()
         .direction(Direction::Vertical)
         .constraints([Constraint::Fill(1), Constraint::Length(1), Constraint::Length(1)])

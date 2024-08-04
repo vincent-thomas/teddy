@@ -1,6 +1,11 @@
+use ratatui::{
+  layout::{Constraint, Direction},
+  prelude::Layout,
+  style::{Color, Style},
+  widgets::{Block, Borders},
+};
 use std::{
   fs::DirEntry,
-  io,
   path::{Path, PathBuf},
 };
 
@@ -120,7 +125,7 @@ impl Component for FilePicker {
     let mut files: Vec<ListItem> = std::fs::read_dir(&self.current_directory)?
       .map(|entry| entry.unwrap().path())
       .map(|pathbuf| {
-        let listitem = ListItem::new(pathbuf.to_str().unwrap().to_string());
+        let listitem = ListItem::new(pathbuf.file_name().unwrap().to_str().unwrap().to_string());
         listitem
       })
       .collect();
@@ -133,7 +138,20 @@ impl Component for FilePicker {
 
     let list = List::default().direction(ListDirection::TopToBottom).items(files);
 
-    frame.render_widget(list, area);
+    let layout =
+      Layout::vertical([Constraint::Length(1), Constraint::Length(1), Constraint::Fill(1)])
+        .split(area);
+
+    let cwd = self.current_directory.to_str().unwrap().to_string();
+
+    frame.render_widget(
+      ratatui::widgets::Paragraph::new(format!(" {}$", cwd))
+        .style(Style::default().fg(Color::Green)),
+      //.block(Block::new().borders(Borders::BOTTOM)),
+      layout[0],
+    );
+    frame.render_widget(Block::new().borders(Borders::BOTTOM), layout[1]);
+    frame.render_widget(list, layout[2]);
 
     Ok(())
   }
@@ -145,16 +163,12 @@ impl Component for FilePicker {
   fn handle_key_event(&mut self, key: KeyEvent) -> Result<Option<Action>> {
     let code = key.code;
     match code {
-      KeyCode::Up => self.focus_up(),
-      KeyCode::Down => self.focus_down(),
-      KeyCode::Enter => return Ok(self.open_entry()),
-      KeyCode::Char(char) => {
-        if char == 'q' {
-          return Ok(Some(Action::CloseActiveBuffer));
-        } else if char == '-' {
-          self.open_parent();
-        }
-      }
+      KeyCode::Up | KeyCode::Char('k') => self.focus_up(),
+      KeyCode::Down | KeyCode::Char('j') => self.focus_down(),
+      KeyCode::Enter | KeyCode::Char('l') => return Ok(self.open_entry()),
+      KeyCode::Char('-') | KeyCode::Char('h') => self.open_parent(),
+      KeyCode::Char('q') => return Ok(Some(Action::CloseActiveBuffer)),
+
       _ => unimplemented!(),
     };
 

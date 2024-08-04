@@ -1,7 +1,7 @@
 use crate::prelude::Result;
 use std::{fs::File, path::Path};
 
-use ratatui::text::Text;
+use ratatui::{text::Text, widgets::Paragraph};
 use ropey::Rope;
 
 use crate::component::Component;
@@ -79,7 +79,7 @@ impl Component for FileBuffer {
 
   fn draw(&mut self, frame: &mut ratatui::Frame, area: ratatui::prelude::Rect) -> Result<()> {
     let text = self.get_buff().to_string();
-    let text = Text::from(text);
+    let text = Paragraph::new(text).scroll((1, 0));
 
     frame.render_widget(text, area);
     Ok(())

@@ -23,15 +23,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
   panic_handler::install()?;
   logging::init()?;
 
-  let args = Argv::parse();
-  let mut app = Application::new();
-
-  app.init(args)?;
-
   let events = events::Events::new();
   let terminal = tui::init()?;
 
-  let err = app.run(terminal, events).await;
+  let args = Argv::parse();
+  let mut app = Application::new(terminal);
+
+  app.init(args)?;
+
+  let err = app.run(events).await;
 
   tui::restore()?;
 

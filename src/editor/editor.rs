@@ -39,6 +39,13 @@ impl Editor {
     Ok(())
   }
 
+  pub fn remove_active_buffer(&mut self) -> Result<()> {
+    if let Some(active) = self.frames.active_frame() {
+      self.remove_buffer(*active)?;
+    }
+    Ok(())
+  }
+
   pub fn component_mut(&mut self) -> &mut dyn Component {
     &mut self.frames
   }
