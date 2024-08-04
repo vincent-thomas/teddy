@@ -1,4 +1,4 @@
-use crossterm::event::{self, Event as CEvent, KeyCode};
+use crossterm::event::{self, Event as CEvent, KeyCode, KeyEvent};
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
 use tokio::sync::mpsc;
@@ -7,15 +7,15 @@ use crate::editor::macros::MacroRequest;
 
 /// CaptureManager is responsible for capturing key events, turning them into actions and sending them to the main thread.
 pub struct KeyCaptureManager {
-  sender: mpsc::Sender<Vec<Key>>,
+  sender: mpsc::Sender<Vec<KeyEvent>>,
   macros_receiver: mpsc::Receiver<MacroRequest>,
   buffer: KeyBuffer,
 }
 
 #[derive(Default)]
 struct KeyBuffer {
-  raw_buffer: Vec<Key>,
-  macro_store: HashMap<char, Vec<Key>>,
+  raw_buffer: Vec<KeyEvent>,
+  macro_store: HashMap<char, Vec<KeyEvent>>,
   // /// Index which buffer has sent, aka don't use info thats behind this index.
   // index_ejac: usize,
   state: BufferState,
@@ -43,9 +43,7 @@ impl From<KeyCode> for Key {
 }
 
 impl KeyBuffer {
-  fn append(&mut self, key: KeyCode) -> Vec<Key> {
-    let raw_char: Key = key.into();
-
+  fn append(&mut self, raw_char: KeyEvent) -> Vec<KeyEvent> {
     self.raw_buffer.push(raw_char.clone());
 
     if let BufferState::MacroInsert(macro_choice) = self.state {
@@ -56,7 +54,7 @@ impl KeyBuffer {
     vec![raw_char]
   }
 
-  pub fn registry_mut(&mut self, registry: char) -> Option<&mut Vec<Key>> {
+  pub fn registry_mut(&mut self, registry: char) -> Option<&mut Vec<KeyEvent>> {
     self.macro_store.get_mut(&registry)
   }
 }
@@ -70,12 +68,15 @@ pub enum Key {
 }
 
 impl KeyCaptureManager {
-  pub fn new(sender: mpsc::Sender<Vec<Key>>, receiver: mpsc::Receiver<MacroRequest>) -> Self {
+  #[tracing::instrument(name = "KeyCaptureManager::new", skip_all)]
+  pub fn new(sender: mpsc::Sender<Vec<KeyEvent>>, receiver: mpsc::Receiver<MacroRequest>) -> Self {
+    tracing::info!("Creating KeyCaptureManager");
     Self { sender, buffer: KeyBuffer::default(), macros_receiver: receiver }
   }
 
   /// Create a start function that listens to input, converts them into actions according to
   /// Action on selection and then send them to the sender given.
+  #[tracing::instrument(skip_all, name = "KeyCaptureManager::start")]
   pub async fn start(&mut self) {
     let tick_rate = Duration::from_millis(100);
     let mut last_tick = Instant::now();
@@ -93,8 +94,10 @@ impl KeyCaptureManager {
       };
 
       if let Some(value) = value {
+        tracing::info!("received macro event: {:?}", value);
         match value {
           MacroRequest::StartRecording(store) => {
+            tracing::trace!("Recording macro into buffer: {:?}", store);
             self.buffer.state = BufferState::MacroInsert(store);
           }
           MacroRequest::StopRecording => {
@@ -131,7 +134,7 @@ impl KeyCaptureManager {
       if event::poll(timeout).unwrap() {
         // TODO: Resize events
         if let CEvent::Key(key) = event::read().expect("can read events") {
-          let output = self.buffer.append(key.code);
+          let output = self.buffer.append(key);
           self.sender.send(output).await.expect("Receiver is dropped");
         }
       }

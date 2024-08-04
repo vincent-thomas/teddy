@@ -16,7 +16,7 @@ pub struct FrameManager {
 
 impl FrameManager {
   pub fn new() -> Self {
-    FrameManager { frames: vec![Frame::new()], active_frame: 0, cursor_manager: Cursor::default() }
+    FrameManager { frames: vec![], active_frame: 0, cursor_manager: Cursor::default() }
   }
 
   pub fn add_frame(&mut self, frame: Frame) {

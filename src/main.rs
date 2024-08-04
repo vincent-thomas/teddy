@@ -1,30 +1,36 @@
-#![allow(dead_code)]
 #![allow(clippy::module_inception)]
+mod action;
 mod application;
 mod buffer;
+mod component;
+mod components;
 pub mod config;
 pub mod editor;
+pub mod events;
 mod frame;
 mod keycapture;
-
-use std::error::Error;
+mod logging;
+mod panic_handler;
+mod tui;
 
 use application::Application;
-use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
-
-#[derive(Default)]
-struct RawBuffer {
-  data: Vec<u8>,
-}
+use std::error::Error;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-  enable_raw_mode()?;
+  panic_handler::install()?;
+  logging::init()?;
+
+  // TODO
+  let terminal = tui::init()?;
 
   let mut app = Application::new();
-  app.start().await?;
 
-  disable_raw_mode()?;
+  let events = events::Events::new();
+
+  app.run(terminal, events).await?;
+
+  tui::restore()?;
 
   Ok(())
 }
