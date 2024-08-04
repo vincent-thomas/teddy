@@ -1,8 +1,11 @@
-use color_eyre::Result;
+use std::error::Error;
+
 use crossterm::event::{KeyEvent, MouseEvent};
 use ratatui::{layout::Rect, Frame};
 
-use crate::action::Action;
+use crate::{action::Action, events::Event};
+
+type Result<O> = core::result::Result<O, Box<dyn Error>>;
 
 //use crate::{action::Action, config::Config, tui::Event};
 
@@ -58,10 +61,13 @@ pub trait Component {
   /// # Returns
   ///
   /// * `Result<Option<Action>>` - An action to be processed or none.
-  fn handle_events(&mut self, event: Option<crossterm::event::Event>) -> Result<Option<Action>> {
+  fn handle_events(&mut self, event: Option<Event>) -> Result<Option<Action>> {
+    use crossterm::event::Event as CrosstermEvent;
     let action = match event {
-      Some(crossterm::event::Event::Key(key_event)) => self.handle_key_event(key_event)?,
-      Some(crossterm::event::Event::Mouse(mouse_event)) => self.handle_mouse_event(mouse_event)?,
+      Some(Event::Crossterm(CrosstermEvent::Key(key_event))) => self.handle_key_event(key_event)?,
+      Some(Event::Crossterm(CrosstermEvent::Mouse(mouse_event))) => {
+        self.handle_mouse_event(mouse_event)?
+      }
       _ => None,
     };
     Ok(action)

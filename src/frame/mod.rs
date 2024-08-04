@@ -1,3 +1,4 @@
+use crate::buffer::placeholder::PlaceholderBuffer;
 use crate::component::Component;
 use std::fmt::Debug;
 use std::path::Path;
@@ -20,14 +21,14 @@ enum FrameMode {
   Fullscreen,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 struct FramePosition {
   frame_mode: FrameMode,
   frame_x: i8,
 }
 
 pub struct Frame {
-  buffer: Box<dyn Component>,
+  pub buffer: Box<dyn Component>,
   position: FramePosition,
 }
 
@@ -40,12 +41,21 @@ impl Debug for Frame {
   }
 }
 
-impl Frame {
-  pub fn new(component: Box<dyn Component>) -> Self {
-    Frame { buffer: component, position: FramePosition::default() }
-  }
+impl Default for Frame {
+  fn default() -> Self {
+    let position = FramePosition { frame_mode: FrameMode::Fullscreen, frame_x: i8::MAX / 2 };
 
-  pub fn file_picker(&mut self, path: Box<Path>) {
-    //self.buffer.set_path(path);
+    let placeholder_buffer = Box::new(PlaceholderBuffer::default());
+    Self { position, buffer: placeholder_buffer }
   }
+}
+
+impl Frame {
+  // pub fn new(component: Box<dyn Component>) -> Self {
+  //   Frame { buffer: component, position: FramePosition::default() }
+  // }
+
+  // pub fn file_picker(&mut self, path: Box<Path>) {
+  //   //self.buffer.set_path(path);
+  // }
 }

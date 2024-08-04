@@ -46,7 +46,8 @@
 
             clippy
             rust-analyzer
-            just
+            cargo-watch
+            bacon
           ];
         };
       }

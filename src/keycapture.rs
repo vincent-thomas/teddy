@@ -44,11 +44,11 @@ impl From<KeyCode> for Key {
 
 impl KeyBuffer {
   fn append(&mut self, raw_char: KeyEvent) -> Vec<KeyEvent> {
-    self.raw_buffer.push(raw_char.clone());
+    self.raw_buffer.push(raw_char);
 
     if let BufferState::MacroInsert(macro_choice) = self.state {
       let entry = self.macro_store.entry(macro_choice);
-      entry.or_default().push(raw_char.clone());
+      entry.or_default().push(raw_char);
     }
 
     vec![raw_char]

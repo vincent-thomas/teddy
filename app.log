@@ -1,108 +1,60 @@
-[2m2024-08-04T02:48:13.673501Z[0m [32m INFO[0m [1mApplication::new[0m: [2meditor::application::app[0m[2m:[0m Initiating application
-[2m2024-08-04T02:48:13.673591Z[0m [35mTRACE[0m [2mmio::poll[0m[2m:[0m registering event source with poller: token=Token(0), interests=READABLE    
-[2m2024-08-04T02:48:13.673643Z[0m [35mTRACE[0m [2mmio::poll[0m[2m:[0m registering event source with poller: token=Token(1), interests=READABLE    
-[2m2024-08-04T02:48:15.179830Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('f'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:15.231711Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('d'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:15.291734Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('s'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:15.381687Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('h'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:15.401685Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('j'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:15.471634Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('k'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:15.490605Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('l'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:15.635679Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('v'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:15.701650Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('c'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:15.741736Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('x'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:15.842294Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('b'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:15.861607Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('n'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:15.901668Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('m'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:15.951613Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char(','), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:16.001428Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('v'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:16.031416Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('c'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:16.071660Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('x'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:16.110673Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('z'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:16.171408Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('b'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:16.210601Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('n'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:16.250617Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char(','), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:16.464372Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('f'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:16.501492Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('d'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:16.531422Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('s'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:16.611621Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('a'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:16.630570Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('h'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:16.640605Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('j'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:16.670423Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('k'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:16.680615Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('l'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:16.780671Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('f'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:16.830672Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('d'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:16.890693Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('s'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:16.960617Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('a'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:16.980421Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('h'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:16.990657Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('j'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:17.010390Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('k'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:17.040387Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('l'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:18.187130Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Resize(186, 30))
-[2m2024-08-04T02:48:18.622502Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Resize(204, 30))
-[2m2024-08-04T02:48:18.759275Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Resize(221, 30))
-[2m2024-08-04T02:48:19.162326Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Resize(204, 30))
-[2m2024-08-04T02:48:19.433124Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Resize(186, 30))
-[2m2024-08-04T02:48:20.220693Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('f'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:20.269642Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('d'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:20.319685Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('s'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:20.399644Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('a'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:20.459659Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('h'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:20.479368Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('j'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:20.548666Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('k'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:20.569568Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('l'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:20.619532Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('f'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:20.659499Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('d'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:20.709547Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('s'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:20.748498Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('a'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:20.778457Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('h'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:20.849471Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('j'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:20.879488Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('k'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:20.898461Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('l'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:21.388463Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('t'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:21.428768Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('r'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:21.579735Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('e'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:21.638897Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('y'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:21.698917Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('i'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:21.708698Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('u'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:21.718401Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('o'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:21.808510Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('t'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:21.858581Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('r'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:21.908592Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('e'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:21.958635Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('w'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:21.959511Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('y'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:22.018642Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('u'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:22.028510Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('i'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:22.068357Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('o'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:22.128675Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('t'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:22.168893Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('r'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:22.218382Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('e'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:22.539948Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('@'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:22.828016Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('4'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:22.878624Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('3'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:22.938575Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('2'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:23.078307Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('7'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:23.098349Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('6'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:23.188751Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('8'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:23.198548Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('5'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:23.207326Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('9'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:23.248365Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('4'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:23.298434Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('3'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:23.378754Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('2'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:23.459516Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('6'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:23.478546Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('7'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:23.479395Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('8'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:23.507487Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('0'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:23.558662Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('5'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:23.618588Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('4'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:23.648429Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('3'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:23.668437Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('2'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:23.808786Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('6'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:23.848766Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('5'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:23.849511Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('7'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:23.877343Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('8'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:23.898478Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('4'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:23.918488Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('9'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:23.937487Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('3'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:23.958483Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('2'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
-[2m2024-08-04T02:48:24.878416Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m event Crossterm(Key(KeyEvent { code: Char('q'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
+[2m2024-08-04T15:06:12.743168Z[0m [32m INFO[0m [1mApplication::new[0m: [2meditor::application::app[0m[2m:[0m Initiating application
+[2m2024-08-04T15:06:12.743234Z[0m [32m INFO[0m [1mApplication::init[0m: [2meditor::application::app[0m[2m:[0m Opening path: "." [2m[3margs[0m[2m=[0mArgv { commands: ["."], flags: {}, after_double_dash: "" }[0m
+[2m2024-08-04T15:06:12.743360Z[0m [35mTRACE[0m [2mmio::poll[0m[2m:[0m registering event source with poller: token=Token(0), interests=READABLE    
+[2m2024-08-04T15:06:12.743425Z[0m [35mTRACE[0m [2mmio::poll[0m[2m:[0m registering event source with poller: token=Token(1), interests=READABLE    
+[2m2024-08-04T15:06:12.744137Z[0m [35mTRACE[0m [2meditor::application::app[0m[2m:[0m action Action::OpenBuffer
+[2m2024-08-04T15:06:12.744219Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m Rendering
+[2m2024-08-04T15:06:12.744248Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m drawing
+[2m2024-08-04T15:06:13.779669Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m received_event: Crossterm(Key(KeyEvent { code: Down, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
+[2m2024-08-04T15:06:13.779903Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m Rendering
+[2m2024-08-04T15:06:13.779975Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m drawing
+[2m2024-08-04T15:06:13.898212Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m received_event: Crossterm(Key(KeyEvent { code: Down, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
+[2m2024-08-04T15:06:13.898292Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m Rendering
+[2m2024-08-04T15:06:13.898335Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m drawing
+[2m2024-08-04T15:06:14.410168Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m received_event: Crossterm(Key(KeyEvent { code: Down, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
+[2m2024-08-04T15:06:14.410306Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m Rendering
+[2m2024-08-04T15:06:14.410354Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m drawing
+[2m2024-08-04T15:06:14.569337Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m received_event: Crossterm(Key(KeyEvent { code: Down, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
+[2m2024-08-04T15:06:14.569527Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m Rendering
+[2m2024-08-04T15:06:14.569609Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m drawing
+[2m2024-08-04T15:06:14.729927Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m received_event: Crossterm(Key(KeyEvent { code: Down, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
+[2m2024-08-04T15:06:14.730078Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m Rendering
+[2m2024-08-04T15:06:14.730141Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m drawing
+[2m2024-08-04T15:06:14.888648Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m received_event: Crossterm(Key(KeyEvent { code: Down, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
+[2m2024-08-04T15:06:14.888834Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m Rendering
+[2m2024-08-04T15:06:14.888938Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m drawing
+[2m2024-08-04T15:06:15.049136Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m received_event: Crossterm(Key(KeyEvent { code: Down, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
+[2m2024-08-04T15:06:15.049320Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m Rendering
+[2m2024-08-04T15:06:15.049394Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m drawing
+[2m2024-08-04T15:06:15.208485Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m received_event: Crossterm(Key(KeyEvent { code: Down, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
+[2m2024-08-04T15:06:15.208598Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m Rendering
+[2m2024-08-04T15:06:15.208656Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m drawing
+[2m2024-08-04T15:06:15.399155Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m received_event: Crossterm(Key(KeyEvent { code: Down, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
+[2m2024-08-04T15:06:15.399340Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m Rendering
+[2m2024-08-04T15:06:15.399416Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m drawing
+[2m2024-08-04T15:06:15.558435Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m received_event: Crossterm(Key(KeyEvent { code: Down, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
+[2m2024-08-04T15:06:15.558527Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m Rendering
+[2m2024-08-04T15:06:15.558575Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m drawing
+[2m2024-08-04T15:06:15.698531Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m received_event: Crossterm(Key(KeyEvent { code: Down, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
+[2m2024-08-04T15:06:15.698625Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m Rendering
+[2m2024-08-04T15:06:15.698673Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m drawing
+[2m2024-08-04T15:06:15.888670Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m received_event: Crossterm(Key(KeyEvent { code: Down, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
+[2m2024-08-04T15:06:15.888821Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m Rendering
+[2m2024-08-04T15:06:15.888874Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m drawing
+[2m2024-08-04T15:06:16.317152Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m received_event: Crossterm(Key(KeyEvent { code: Enter, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
+[2m2024-08-04T15:06:16.317351Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m Rendering
+[2m2024-08-04T15:06:16.317404Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m drawing
+[2m2024-08-04T15:06:16.777731Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m received_event: Crossterm(Key(KeyEvent { code: Down, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
+[2m2024-08-04T15:06:16.777873Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m Rendering
+[2m2024-08-04T15:06:16.777959Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m drawing
+[2m2024-08-04T15:06:16.898622Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m received_event: Crossterm(Key(KeyEvent { code: Down, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
+[2m2024-08-04T15:06:16.898722Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m Rendering
+[2m2024-08-04T15:06:16.898772Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m drawing
+[2m2024-08-04T15:06:17.058369Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m received_event: Crossterm(Key(KeyEvent { code: Down, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
+[2m2024-08-04T15:06:17.058451Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m Rendering
+[2m2024-08-04T15:06:17.058491Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m drawing
+[2m2024-08-04T15:06:17.588052Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m received_event: Crossterm(Key(KeyEvent { code: Enter, modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))
+[2m2024-08-04T15:06:17.588381Z[0m [35mTRACE[0m [2meditor::application::app[0m[2m:[0m action Action::ReplaceActiveBuffer
+[2m2024-08-04T15:06:17.588441Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m Rendering
+[2m2024-08-04T15:06:17.588511Z[0m [35mTRACE[0m [1mApplication::render[0m: [2meditor::application::app[0m[2m:[0m drawing
+[2m2024-08-04T15:06:23.665921Z[0m [32m INFO[0m [2meditor::application::app[0m[2m:[0m received_event: Crossterm(Key(KeyEvent { code: Char('q'), modifiers: KeyModifiers(0x0), kind: Press, state: KeyEventState(0x0) }))

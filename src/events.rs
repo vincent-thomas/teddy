@@ -1,9 +1,7 @@
-use crossterm::event::{Event as CrosstermEvent, EventStream};
+use crossterm::event::{Event as CrosstermEvent, EventStream, MouseEventKind};
 use futures::{Stream, StreamExt};
-use std::pin::Pin;
+use std::{io, pin::Pin};
 use tokio_stream::StreamMap;
-
-use crate::action::Notification;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 pub enum StreamName {
@@ -12,13 +10,13 @@ pub enum StreamName {
   Render,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub enum Event {
   Quit,
-  SendNotification(Notification),
   Crossterm(CrosstermEvent),
 
-  LSPError, // TODO
+  LSPError, // TODO,
+  EventStreamError(io::Error),
 }
 
 pub struct Events {
@@ -39,13 +37,18 @@ impl Events {
 fn crossterm_stream() -> Pin<Box<dyn Stream<Item = Event>>> {
   use crossterm::event::{Event as CrosstermEvent, KeyEventKind};
   Box::pin(EventStream::new().fuse().filter_map(|event| async move {
-    match event {
-      Ok(CrosstermEvent::Key(key)) if key.kind == KeyEventKind::Release => None,
-      Ok(event) => Some(Event::Crossterm(event)),
-      Err(_) => Some(Event::SendNotification(Notification::new(
-        crate::action::NotificationLevel::Error,
-        "internal_error: crossterm stopped".to_string(),
-      ))),
+    let crossterm_event = match event {
+      Ok(real_event) => real_event,
+      Err(err) => return Some(Event::EventStreamError(err)),
+    };
+
+    match crossterm_event {
+      CrosstermEvent::Key(key) if key.kind == KeyEventKind::Release => None,
+      CrosstermEvent::Key(_) => Some(Event::Crossterm(crossterm_event)),
+
+      CrosstermEvent::Mouse(mouse) if matches!(mouse.kind, MouseEventKind::Up(_)) => None,
+      CrosstermEvent::Mouse(_) => Some(Event::Crossterm(crossterm_event)),
+      _ => None,
     }
   }))
 }

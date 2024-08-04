@@ -1,19 +1,57 @@
-use crate::frame::{manager::FrameManager, Frame};
+use std::error::Error;
 
-use super::{editor_mode::EditorMode, macros::MacroStateManager};
+use crossterm::event::KeyEvent;
+
+use crate::{
+  action::Action,
+  component::Component,
+  events::Event,
+  frame::{manager::FrameManager, Frame},
+  prelude::Result,
+};
+
+use super::editor_mode::EditorMode;
 
 pub struct Editor {
   frames: FrameManager,
-  macro_manager: MacroStateManager,
+  //macro_manager: MacroStateManager,
   editor_mode: EditorMode,
 }
 
 impl Editor {
   pub fn new() -> Self {
     let frames = FrameManager::new();
-    let macro_manager = MacroStateManager::default();
+    //let macro_manager = MacroStateManager::default();
     let editor_mode = EditorMode::Normal;
-    Self { frames, macro_manager, editor_mode }
+    Self { frames, /* macro_manager, */ editor_mode }
+  }
+
+  pub fn open_buffer(&mut self, buffer: Box<dyn Component>) -> Result<()> {
+    let index = self.frames.add_window();
+
+    self.frames.fill_window(index, buffer);
+
+    Ok(())
+  }
+
+  pub fn remove_buffer(&mut self, index: u16) -> Result<()> {
+    self.frames.remove_window(index);
+    Ok(())
+  }
+
+  pub fn component_mut(&mut self) -> &mut dyn Component {
+    &mut self.frames
+  }
+
+  pub fn forward_keyevent(&mut self, event: KeyEvent) -> Result<Option<Action>> {
+    self.frames.handle_key_event(event)
+  }
+
+  pub fn replace_active_buffer(&mut self, buffer: Box<dyn Component>) -> Result<()> {
+    if let Some(active) = self.frames.active_frame() {
+      self.frames.fill_window(*active, buffer).unwrap();
+    }
+    Ok(())
   }
 
   // pub async fn start(&mut self) -> Result<(), Box<dyn StdError>> {

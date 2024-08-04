@@ -7,7 +7,9 @@ pub enum Action {
   Resize(u16, u16),
   AttachNotification(Notification),
   OpenBuffer(Box<dyn Component>),
-  CloseBuffer { buffer_id: u16 },
+  ReplaceActiveBuffer(Box<dyn Component>),
+
+  CloseActiveBuffer,
   WriteBuffer { buffer_id: u16 },
 
   AttachLSPToCurrentBuffer,
@@ -57,10 +59,9 @@ impl Debug for Action {
       Action::Quit => write!(f, "Action::Quit"),
       Action::Resize(x, y) => write!(f, "Action::Resize({}, {})", x, y),
       Action::AttachNotification(ref msg) => write!(f, "Action::WriteErrorMessage({:?})", msg),
+      Action::ReplaceActiveBuffer(_) => write!(f, "Action::ReplaceActiveBuffer"),
       Action::OpenBuffer(_) => write!(f, "Action::OpenBuffer"),
-      Action::CloseBuffer { buffer_id } => {
-        write!(f, "Action::CloseBuffer {{ buffer_id: {} }}", buffer_id)
-      }
+      Action::CloseActiveBuffer => write!(f, "Action::CloseActiveBuffer"),
       Action::WriteBuffer { buffer_id } => {
         write!(f, "Action::WriteBuffer {{ buffer_id: {} }}", buffer_id)
       }
