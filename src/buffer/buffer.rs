@@ -77,6 +77,13 @@ impl Component for FileBuffer {
     todo!()
   }
 
+  fn register_action_handler(
+    &mut self,
+    tx: tokio::sync::mpsc::UnboundedSender<crate::action::Action>,
+  ) -> Result<()> {
+    Ok(())
+  }
+
   fn draw(&mut self, frame: &mut ratatui::Frame, area: ratatui::prelude::Rect) -> Result<()> {
     let text = self.get_buff().to_string();
     let text = Paragraph::new(text).scroll((1, 0));

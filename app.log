@@ -1,6 +1,6 @@
-[2m2024-08-04T17:42:24.931884Z[0m [35mTRACE[0m [2mmio::poll[0m[2m:[0m registering event source with poller: token=Token(0), interests=READABLE    
-[2m2024-08-04T17:42:24.931972Z[0m [35mTRACE[0m [2mmio::poll[0m[2m:[0m registering event source with poller: token=Token(1), interests=READABLE    
-[2m2024-08-04T17:42:24.932080Z[0m [32m INFO[0m [1mApplication::new[0m: [2meditor::application::app[0m[2m:[0m Initiating application [2m[3mtui[0m[2m=[0mCrosstermBackend { writer: Stdout { .. } }[0m
-[2m2024-08-04T17:42:24.932705Z[0m [32m INFO[0m [1mApplication::init[0m: [2meditor::application::app[0m[2m:[0m Opening path: "." [2m[3margs[0m[2m=[0mArgv { commands: ["."], flags: {}, after_double_dash: "" }[0m
-[2m2024-08-04T17:42:24.932775Z[0m [35mTRACE[0m [2meditor::application::app[0m[2m:[0m action Action::OpenBuffer
-[2m2024-08-04T17:42:26.002150Z[0m [35mTRACE[0m [2meditor::application::app[0m[2m:[0m action Action::CloseActiveBuffer
+[2m2024-08-06T23:28:03.047947Z[0m [35mTRACE[0m [2mmio::poll[0m[2m:[0m registering event source with poller: token=Token(0), interests=READABLE    
+[2m2024-08-06T23:28:03.048024Z[0m [35mTRACE[0m [2mmio::poll[0m[2m:[0m registering event source with poller: token=Token(1), interests=READABLE    
+[2m2024-08-06T23:28:03.048141Z[0m [32m INFO[0m [1mApplication::new[0m: [2mteddy::application::app[0m[2m:[0m Initiating application [2m[3mtui[0m[2m=[0mCrosstermBackend { writer: Stdout { .. } }[0m
+[2m2024-08-06T23:28:03.048517Z[0m [32m INFO[0m [1mApplication::init[0m: [2mteddy::application::app[0m[2m:[0m Opening path: "flake.nix" [2m[3margs[0m[2m=[0mArgv { commands: ["flake.nix"], flags: {}, after_double_dash: "" }[0m
+[2m2024-08-06T23:28:03.048687Z[0m [35mTRACE[0m [2mteddy::application::app[0m[2m:[0m action Action::OpenBuffer
+[2m2024-08-06T23:28:05.481449Z[0m [35mTRACE[0m [2mteddy::frame[0m[2m:[0m MouseEvent { kind: Down(Left), column: 36, row: 7, modifiers: KeyModifiers(0x0) }

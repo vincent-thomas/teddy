@@ -4,11 +4,9 @@ mod application;
 mod buffer;
 mod component;
 mod components;
-//mod config;
 mod editor;
 mod events;
 mod frame;
-//mod keycapture;
 mod logging;
 mod panic_handler;
 mod prelude;
@@ -35,9 +33,5 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
   tui::restore()?;
 
-  if let Err(e) = err {
-    println!("App error: {e:?}");
-  }
-
-  Ok(())
+  err
 }

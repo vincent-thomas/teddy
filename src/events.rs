@@ -39,7 +39,7 @@ impl Events {
 }
 
 fn render_stream() -> Pin<Box<dyn Stream<Item = Event>>> {
-  let interval = interval(Duration::from_millis(100));
+  let interval = interval(Duration::from_millis(200));
   let stream = IntervalStream::new(interval).map(|_| Event::Render);
   Box::pin(stream)
 }

@@ -1,6 +1,7 @@
 use std::io::{self, stdout, Stdout};
 
 use crossterm::{
+  event::EnableMouseCapture,
   execute,
   terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
@@ -9,12 +10,10 @@ use ratatui::{backend::CrosstermBackend, Terminal};
 pub type Tui = Terminal<CrosstermBackend<Stdout>>;
 
 pub fn init() -> io::Result<CrosstermBackend<Stdout>> {
-  execute!(io::stdout(), EnterAlternateScreen)?;
+  execute!(io::stdout(), EnterAlternateScreen, EnableMouseCapture)?;
   enable_raw_mode()?;
 
   Ok(CrosstermBackend::new(stdout()))
-
-  //Terminal::new(backend)
 }
 
 pub fn restore() -> io::Result<()> {

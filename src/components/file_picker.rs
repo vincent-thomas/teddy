@@ -1,5 +1,5 @@
 use ratatui::{
-  layout::{Constraint, Direction},
+  layout::Constraint,
   prelude::Layout,
   style::{Color, Style},
   widgets::{Block, Borders},
@@ -104,12 +104,7 @@ impl FilePicker {
 
     let mut dir = test.into_iter().map(|v| v.unwrap().path());
 
-    let old_dir_index = dir
-      .position(|thing| {
-        tracing::trace!("{:?}", thing);
-        self.current_directory.as_os_str() == thing
-      })
-      .unwrap();
+    let old_dir_index = dir.position(|thing| self.current_directory.as_os_str() == thing).unwrap();
 
     self.current_directory = file;
     self.list_item_focus = Some(old_dir_index);
@@ -169,7 +164,10 @@ impl Component for FilePicker {
       KeyCode::Char('-') | KeyCode::Char('h') => self.open_parent(),
       KeyCode::Char('q') => return Ok(Some(Action::CloseActiveBuffer)),
 
-      _ => unimplemented!(),
+      KeyCode::Char(other) => {
+        tracing::trace!("Pressed: {:?}", other);
+      }
+      _ => {}
     };
 
     Ok(None)

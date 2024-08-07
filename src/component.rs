@@ -2,6 +2,7 @@ use std::error::Error;
 
 use crossterm::event::{KeyEvent, MouseEvent};
 use ratatui::{layout::Rect, Frame};
+use tokio::sync::mpsc::UnboundedSender;
 
 use crate::{action::Action, events::Event};
 
@@ -14,20 +15,22 @@ type Result<O> = core::result::Result<O, Box<dyn Error>>;
 /// Implementors of this trait can be registered with the main application loop and will be able to
 /// receive events, update state, and be rendered on the screen.
 pub trait Component {
-  // /// Register an action handler that can send actions for processing if necessary.
-  // ///
-  // /// # Arguments
-  // ///
-  // /// * `tx` - An unbounded sender that can send actions.
-  // ///
-  // /// # Returns
-  // ///
-  // /// * `Result<()>` - An Ok result or an error.
-  // TODO:
-  // fn register_action_handler(&mut self, tx: UnboundedSender<Action>) -> Result<()> {
-  //   let _ = tx; // to appease clippy
-  //   Ok(())
-  // }
+  fn readonly(&self) -> bool {
+    false
+  }
+  /// Register an action handler that can send actions for processing if necessary.
+  ///
+  /// # Arguments
+  ///
+  /// * `tx` - An unbounded sender that can send actions.
+  ///
+  /// # Returns
+  ///
+  /// * `Result<()>` - An Ok result or an error.
+  fn register_action_handler(&mut self, tx: UnboundedSender<Action>) -> Result<()> {
+    let _ = tx; // to appease clippy
+    Ok(())
+  }
   // /// Register a configuration handler that provides configuration settings if necessary.
   // ///
   // /// # Arguments
