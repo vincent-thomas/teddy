@@ -9,7 +9,10 @@ use std::{
   path::{Path, PathBuf},
 };
 
-use crate::{buffer::buffer::FileBuffer, prelude::*};
+use crate::{
+  buffer::buffer::{Buffer, FileBuffer},
+  prelude::*,
+};
 use crossterm::event::{KeyCode, KeyEvent};
 use ratatui::widgets::{List, ListDirection, ListItem};
 
@@ -111,11 +114,13 @@ impl FilePicker {
   }
 }
 
-impl Component for FilePicker {
-  fn init(&mut self, area: ratatui::prelude::Rect) -> Result<()> {
-    unimplemented!()
+impl Buffer for FilePicker {
+  fn get_buff(&self) -> &ropey::Rope {
+    panic!("FilePicker does not have a buffer");
   }
+}
 
+impl Component for FilePicker {
   fn draw(&mut self, frame: &mut ratatui::Frame, area: ratatui::prelude::Rect) -> Result<()> {
     let mut files: Vec<ListItem> = std::fs::read_dir(&self.current_directory)?
       .map(|entry| entry.unwrap().path())
@@ -149,10 +154,6 @@ impl Component for FilePicker {
     frame.render_widget(list, layout[2]);
 
     Ok(())
-  }
-
-  fn update(&mut self, action: Action) -> Result<Option<Action>> {
-    unimplemented!()
   }
 
   fn handle_key_event(&mut self, key: KeyEvent) -> Result<Option<Action>> {

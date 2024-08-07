@@ -28,7 +28,7 @@ impl Events {
   pub fn new() -> Self {
     let streams = StreamMap::from_iter([
       (StreamName::CrossTerm, crossterm_stream()),
-      (StreamName::Renders, render_stream()),
+      //(StreamName::Renders, render_stream()),
     ]);
     Events { streams }
   }

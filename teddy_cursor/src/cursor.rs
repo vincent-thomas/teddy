@@ -44,10 +44,26 @@ impl Cursor {
     }
   }
 
-  pub fn move_right(&mut self, lines: CursorLines) {
+  pub fn move_right(&mut self, lines: &CursorLines) {
     if self.x < lines.current_line {
       self.x += 1;
       self.max_x = self.x;
+    }
+  }
+
+  /// Requesting to go to some other place.
+  /// Arguments:
+  /// - pos: The position to go to.
+  /// - line: The line length of the line to go to.
+  /// Returns:
+  ///   If the request was successfull.
+  pub fn request_goto(&mut self, pos: (usize, usize), line: Option<usize>) -> bool {
+    if let Some(line) = line {
+      self.y = pos.1;
+      self.x = pos.0.min(line);
+      true
+    } else {
+      false
     }
   }
 
@@ -81,7 +97,7 @@ mod tests {
 
     let lines: CursorLines = CursorLines::new(Some(1), 4, None);
 
-    cursor.move_right(lines);
+    cursor.move_right(&lines);
 
     assert_eq!(cursor.x, 4);
     assert_eq!(cursor.y, 2);

@@ -1,8 +1,8 @@
-use std::{error::Error, io::Stdout, path::Path};
+use std::{error::Error, io::Stdout, path::Path, rc::Rc};
 
 use clier_parser::Argv;
 use ratatui::{
-  layout::{Constraint, Direction, Layout},
+  layout::{Constraint, Layout, Rect},
   prelude::CrosstermBackend,
   widgets::{Block, Paragraph},
   Terminal,
@@ -30,6 +30,11 @@ pub struct Application {
   should_quit: bool,
 
   terminal: Tui,
+  root_area: Rect,
+  app_layout: Option<Rc<[Rect]>>,
+
+  should_render_cursor: bool,
+  cursor: (u16, u16),
 }
 
 impl Application {
@@ -39,13 +44,33 @@ impl Application {
 
     let (sender, receiver) = mpsc::unbounded_channel();
 
+    let editor = Editor::new(sender.clone());
+
+    let mut terminal = Terminal::new(tui).unwrap();
+
+    let root_area = terminal.get_frame().size();
+
     Application {
       action_receiver: receiver,
       action_sender: sender,
-      editor: Editor::new(),
+      editor,
       should_quit: false,
-      terminal: Terminal::new(tui).unwrap(),
+      terminal,
+
+      // UI
+      root_area,
+      app_layout: None,
+
+      should_render_cursor: false,
+      cursor: (0, 0),
     }
+  }
+
+  fn get_layout(area: Rect) -> Rc<[Rect]> {
+    let layout =
+      Layout::vertical([Constraint::Fill(1), Constraint::Length(1), Constraint::Length(1)]);
+
+    layout.split(area)
   }
 
   #[tracing::instrument(name = "Application::init", skip(self))]
@@ -62,6 +87,10 @@ impl Application {
 
       self.action_sender.send(Action::OpenBuffer(boxed_buffer))?;
     }
+    let area = self.terminal.get_frame().size();
+    let layout = Application::get_layout(area);
+    self.app_layout = Some(layout.clone());
+    self.editor.set_area(layout[1]);
     Ok(())
   }
 
@@ -130,6 +159,9 @@ impl Application {
         self.editor.replace_active_buffer(buffer)?;
       }
       Action::Resize(_x, _y) => self.render()?,
+      Action::ShowCursor => self.should_render_cursor = true,
+      Action::HideCursor => self.should_render_cursor = false,
+      Action::MoveCursor(x, y) => self.cursor = (x, y),
       Action::CloseActiveBuffer => self.editor.remove_active_buffer()?,
       _ => unimplemented!(),
     };
@@ -140,14 +172,21 @@ impl Application {
   #[tracing::instrument(name = "Application::render", skip_all)]
   fn render(&mut self) -> Result<(), Box<dyn Error>> {
     self.terminal.draw(|frame| {
-      let layout = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([Constraint::Fill(1), Constraint::Length(1), Constraint::Length(1)])
-        .split(frame.size());
+      let layout = Application::get_layout(frame.size());
 
-      self.editor.render(frame, layout[0]).unwrap();
+      let main_layout = layout[0];
+      self.editor.set_area(main_layout);
+
+      self.editor.render(frame, main_layout).unwrap();
       frame.render_widget(Paragraph::new("Status line").block(Block::new()), layout[1]);
     })?;
+
+    if self.should_render_cursor {
+      self.terminal.show_cursor()?;
+      self.terminal.set_cursor(self.cursor.0, self.cursor.1)?;
+    } else {
+      self.terminal.hide_cursor()?;
+    }
 
     Ok(())
   }

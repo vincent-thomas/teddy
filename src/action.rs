@@ -4,8 +4,14 @@ use std::{fmt::Debug, path::PathBuf};
 /// Every single action a component can take.
 pub enum Action {
   Quit,
+
+  // Crossterm actions
   Resize(u16, u16),
   AttachNotification(Notification),
+  ShowCursor,
+  HideCursor,
+  MoveCursor(u16, u16),
+
   OpenBuffer(Box<dyn Component>),
   ReplaceActiveBuffer(Box<dyn Component>),
 
@@ -58,6 +64,9 @@ impl Debug for Action {
     match *self {
       Action::Quit => write!(f, "Action::Quit"),
       Action::Resize(x, y) => write!(f, "Action::Resize({}, {})", x, y),
+      Action::MoveCursor(_, _) => write!(f, "Action::MoveCursor"),
+      Action::HideCursor => write!(f, "Action::HideCursor"),
+      Action::ShowCursor => write!(f, "Action::ShowCursor"),
       Action::AttachNotification(ref msg) => write!(f, "Action::WriteErrorMessage({:?})", msg),
       Action::ReplaceActiveBuffer(_) => write!(f, "Action::ReplaceActiveBuffer"),
       Action::OpenBuffer(_) => write!(f, "Action::OpenBuffer"),

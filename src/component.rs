@@ -1,12 +1,9 @@
-use std::error::Error;
-
+use crate::{buffer::buffer::Buffer, prelude::Result};
 use crossterm::event::{KeyEvent, MouseEvent};
 use ratatui::{layout::Rect, Frame};
 use tokio::sync::mpsc::UnboundedSender;
 
 use crate::{action::Action, events::Event};
-
-type Result<O> = core::result::Result<O, Box<dyn Error>>;
 
 //use crate::{action::Action, config::Config, tui::Event};
 
@@ -14,7 +11,7 @@ type Result<O> = core::result::Result<O, Box<dyn Error>>;
 ///
 /// Implementors of this trait can be registered with the main application loop and will be able to
 /// receive events, update state, and be rendered on the screen.
-pub trait Component {
+pub trait Component: Buffer {
   fn readonly(&self) -> bool {
     false
   }
@@ -45,16 +42,18 @@ pub trait Component {
   //   let _ = config; // to appease clippy
   //   Ok(())
   // }
-  /// Initialize the component with a specified area if necessary.
-  ///
-  /// # Arguments
-  ///
-  /// * `area` - Rectangular area to initialize the component within.
-  ///
-  /// # Returns
-  ///
-  /// * `Result<()>` - An Ok result or an error.
-  fn init(&mut self, area: Rect) -> Result<()>;
+  // /// Initialize the component with a specified area if necessary.
+  // ///
+  // /// # Arguments
+  // ///
+  // /// * `area` - Rectangular area to initialize the component within.
+  // ///
+  // /// # Returns
+  // ///
+  // /// * `Result<()>` - An Ok result or an error.
+  // fn init(&mut self, area: Rect) -> Result<()> {
+  //
+  // }
   /// Handle incoming events and produce actions if necessary.
   ///
   /// # Arguments
@@ -95,16 +94,16 @@ pub trait Component {
   ///
   /// * `Result<Option<Action>>` - An action to be processed or none.
   fn handle_mouse_event(&mut self, mouse: MouseEvent) -> Result<Option<Action>>;
-  /// Update the state of the component based on a received action. (REQUIRED)
-  ///
-  /// # Arguments
-  ///
-  /// * `action` - An action that may modify the state of the component.
-  ///
-  /// # Returns
-  ///
-  /// * `Result<Option<Action>>` - An action to be processed or none.
-  fn update(&mut self, action: Action) -> Result<Option<Action>>;
+  // /// Update the state of the component based on a received action. (REQUIRED)
+  // ///
+  // /// # Arguments
+  // ///
+  // /// * `action` - An action that may modify the state of the component.
+  // ///
+  // /// # Returns
+  // ///
+  // /// * `Result<Option<Action>>` - An action to be processed or none.
+  // fn update(&mut self, action: Action) -> Result<Option<Action>>;
   /// Render the component on the screen. (REQUIRED)
   ///
   /// # Arguments

@@ -755,6 +755,9 @@ dependencies = [
 [[package]]
 name = "teddy_cursor"
 version = "0.1.0"
+dependencies = [
+ "tracing",
+]
 
 [[package]]
 name = "thread_local"

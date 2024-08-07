@@ -1,5 +1,6 @@
 use crossterm::event::{KeyEvent, MouseEvent};
 use ratatui::{layout::Rect, Frame};
+use tokio::sync::mpsc::UnboundedSender;
 
 use crate::{action::Action, component::Component, frame::manager::FrameManager, prelude::Result};
 
@@ -11,14 +12,26 @@ pub struct Editor {
 }
 
 impl Editor {
-  pub fn new() -> Self {
-    let frames = FrameManager::new();
+  pub fn new(sender: UnboundedSender<Action>) -> Self {
+    let mut frames = FrameManager::new();
+
+    frames.register_action_handler(sender);
     let editor_mode = EditorMode::default();
     Self { frames, editor_mode }
   }
 
+  pub fn set_area(&mut self, area: Rect) {
+    self.frames.set_area(area);
+  }
+
+  /// By calling this method you require a [ratatui::layout::Rect] when getting FrameManager
+  fn frame_manager_mut(&mut self) -> &mut FrameManager {
+    &mut self.frames
+  }
+
   pub fn open_buffer(&mut self, buffer: Box<dyn Component>) -> Result<()> {
-    let index = self.frames.add_window();
+    tracing::info!("Opening buffer");
+    let index = self.frames.add_window().unwrap();
 
     self.frames.fill_window(index, buffer);
 
@@ -32,13 +45,9 @@ impl Editor {
 
   pub fn remove_active_buffer(&mut self) -> Result<()> {
     if let Some(active) = self.frames.active_frame() {
-      self.remove_buffer(*active)?;
+      self.frames.remove_window(*active);
     }
     Ok(())
-  }
-
-  pub fn component_mut(&mut self) -> &mut dyn Component {
-    &mut self.frames
   }
 
   pub fn forward_keyevent(&mut self, event: KeyEvent) -> Result<Option<Action>> {
@@ -46,12 +55,13 @@ impl Editor {
   }
 
   pub fn forward_mouseevent(&mut self, event: MouseEvent) -> Result<Option<Action>> {
-    self.frames.handle_mouse_event(event)
+    self.frame_manager_mut().handle_mouse_event(event)
   }
 
   pub fn replace_active_buffer(&mut self, buffer: Box<dyn Component>) -> Result<()> {
-    if let Some(active) = self.frames.active_frame() {
-      self.frames.fill_window(*active, buffer).unwrap();
+    let manager = self.frame_manager_mut();
+    if let Some(active) = manager.active_frame() {
+      manager.fill_window(*active, buffer).unwrap();
     }
     Ok(())
   }
