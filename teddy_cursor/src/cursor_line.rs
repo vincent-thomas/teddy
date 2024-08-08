@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct CursorLines {
   // pub position: (usize, usize),
   pub line_above: Option<usize>,

@@ -12,9 +12,6 @@ use crate::{action::Action, events::Event};
 /// Implementors of this trait can be registered with the main application loop and will be able to
 /// receive events, update state, and be rendered on the screen.
 pub trait Component: Buffer {
-  fn readonly(&self) -> bool {
-    false
-  }
   /// Register an action handler that can send actions for processing if necessary.
   ///
   /// # Arguments
@@ -42,18 +39,18 @@ pub trait Component: Buffer {
   //   let _ = config; // to appease clippy
   //   Ok(())
   // }
-  // /// Initialize the component with a specified area if necessary.
-  // ///
-  // /// # Arguments
-  // ///
-  // /// * `area` - Rectangular area to initialize the component within.
-  // ///
-  // /// # Returns
-  // ///
-  // /// * `Result<()>` - An Ok result or an error.
-  // fn init(&mut self, area: Rect) -> Result<()> {
-  //
-  // }
+  /// Initialize the component with a specified area if necessary.
+  ///
+  /// # Arguments
+  ///
+  /// * `area` - Rectangular area to initialize the component within.
+  ///
+  /// # Returns
+  ///
+  /// * `Result<()>` - An Ok result or an error.
+  fn init(&mut self, area: Rect) -> Result<()> {
+    Ok(())
+  }
   /// Handle incoming events and produce actions if necessary.
   ///
   /// # Arguments
