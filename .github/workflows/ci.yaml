@@ -21,6 +21,6 @@ jobs:
     - uses: DeterminateSystems/magic-nix-cache-action@v2
     - run: nix develop
     - name: Run tests
-      run: cargo nextest r --workspace
+      run: cargo test --workspace
 
 
