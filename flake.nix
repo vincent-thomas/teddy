@@ -33,15 +33,12 @@
             }/lib/rustlib/src/rust/library";
 
           buildInputs = with pkgs; [
-            openssl.dev
-            glib.dev
-            pkg-config
+            # openssl.dev
+            # glib.dev
+            # pkg-config
 
-            clippy
-            rust-analyzer
             cargo-watch
             cargo-nextest
-            bacon
           ];
         };
       });
