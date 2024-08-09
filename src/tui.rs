@@ -5,9 +5,7 @@ use crossterm::{
   execute,
   terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
-use ratatui::{backend::CrosstermBackend, Terminal};
-
-pub type Tui = Terminal<CrosstermBackend<Stdout>>;
+use ratatui::backend::CrosstermBackend;
 
 pub fn init() -> io::Result<CrosstermBackend<Stdout>> {
   execute!(io::stdout(), EnterAlternateScreen, EnableMouseCapture)?;

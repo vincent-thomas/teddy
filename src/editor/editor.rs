@@ -1,5 +1,10 @@
 use crossterm::event::{KeyEvent, MouseEvent};
-use ratatui::{layout::Rect, Frame};
+use ratatui::{
+  layout::{Constraint, Direction, Layout, Rect},
+  style::Style,
+  text::Text,
+  Frame,
+};
 use tokio::sync::mpsc::UnboundedSender;
 
 use crate::{action::Action, component::Component, frame::manager::FrameManager, prelude::Result};
@@ -13,13 +18,15 @@ pub struct Editor {
 
 impl Editor {
   pub fn new(sender: UnboundedSender<Action>) -> Self {
-    let mut frames = FrameManager::new();
+    let mut frames = FrameManager::default();
 
-    frames.register_action_handler(sender);
+    frames.register_action_handler(sender).unwrap();
     let editor_mode = EditorMode::default();
     Self { frames, editor_mode }
   }
+}
 
+impl Editor {
   pub fn set_area(&mut self, area: Rect) {
     self.frames.set_area(area);
   }
@@ -66,7 +73,26 @@ impl Editor {
     Ok(())
   }
 
-  pub fn render(&mut self, frame: &mut Frame, area: Rect) -> Result<()> {
-    self.frames.draw(frame, area)
+  pub fn render(&mut self, frame: &mut Frame) -> Result<()> {
+    let area = frame.size();
+    let layout =
+      Layout::vertical([Constraint::Fill(1), Constraint::Length(1), Constraint::Length(1)])
+        .split(area);
+    self.frames.set_area(layout[0]);
+
+    self.frames.draw(frame, layout[0])?;
+    self.render_statusbar(frame, layout[1])?;
+
+    Ok(())
+  }
+
+  fn render_statusbar(&self, frame: &mut Frame, area: Rect) -> Result<()> {
+    let layout = Layout::default()
+      .direction(Direction::Horizontal)
+      .constraints([Constraint::Length(10), Constraint::Length(10)]);
+    let chunks = layout.split(area);
+    frame.render_widget(Text::styled("Status", Style::default()), chunks[0]);
+    frame.render_widget(Text::styled("Mode", Style::default()), chunks[1]);
+    Ok(())
   }
 }

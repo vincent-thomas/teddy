@@ -1,9 +1,10 @@
 use crate::{buffer::buffer::Buffer, prelude::Result};
 use crossterm::event::{KeyEvent, MouseEvent};
 use ratatui::{layout::Rect, Frame};
+use teddy_events::Event;
 use tokio::sync::mpsc::UnboundedSender;
 
-use crate::{action::Action, events::Event};
+use crate::action::Action;
 
 //use crate::{action::Action, config::Config, tui::Event};
 
@@ -48,7 +49,7 @@ pub trait Component: Buffer {
   /// # Returns
   ///
   /// * `Result<()>` - An Ok result or an error.
-  fn init(&mut self, area: Rect) -> Result<()> {
+  fn init(&mut self) -> Result<()> {
     Ok(())
   }
   /// Handle incoming events and produce actions if necessary.

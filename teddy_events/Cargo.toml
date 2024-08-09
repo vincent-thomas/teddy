@@ -1,0 +1,9 @@
+[package]
+name = "teddy_events"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+futures = "0.3.30"
+tokio-stream = "0.1.15"
+crossterm = {workspace = true}

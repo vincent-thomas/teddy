@@ -61,6 +61,7 @@ impl Cursor {
     if let Some(line) = line {
       self.y = pos.1;
       self.x = pos.0.min(line);
+      self.max_x = self.x;
       true
     } else {
       false

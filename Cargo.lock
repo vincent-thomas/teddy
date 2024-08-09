@@ -741,13 +741,12 @@ dependencies = [
  "clier_parser",
  "color-eyre",
  "crossterm",
- "futures",
  "rand",
  "ratatui",
  "ropey",
  "teddy_cursor",
+ "teddy_events",
  "tokio",
- "tokio-stream",
  "tracing",
  "tracing-subscriber",
 ]
@@ -757,6 +756,15 @@ name = "teddy_cursor"
 version = "0.1.0"
 dependencies = [
  "tracing",
+]
+
+[[package]]
+name = "teddy_events"
+version = "0.1.0"
+dependencies = [
+ "crossterm",
+ "futures",
+ "tokio-stream",
 ]
 
 [[package]]

@@ -4,9 +4,9 @@ use clier_parser::Argv;
 use ratatui::{
   layout::{Constraint, Layout, Rect},
   prelude::CrosstermBackend,
-  widgets::{Block, Paragraph},
   Terminal,
 };
+use teddy_events::{Event, Events};
 use tokio::sync::mpsc;
 
 use crate::{
@@ -15,8 +15,7 @@ use crate::{
   component::Component,
   components::file_picker::FilePicker,
   editor::Editor,
-  events::{Event, Events},
-  tui::Tui,
+  prelude::Tui,
 };
 
 pub struct Application {
@@ -161,7 +160,7 @@ impl Application {
       Action::Resize(_x, _y) => self.render()?,
       Action::ShowCursor => self.should_render_cursor = true,
       Action::HideCursor => self.should_render_cursor = false,
-      Action::MoveCursor(x, y) => self.cursor = (x, y),
+      Action::MoveCursor(x, y) => self.cursor = (x.try_into().unwrap(), y.try_into().unwrap()),
       Action::CloseActiveBuffer => self.editor.remove_active_buffer()?,
       _ => unimplemented!(),
     };
@@ -171,16 +170,9 @@ impl Application {
   // Render the `AppWidget` as a stateful widget using `self` as the `State`
   #[tracing::instrument(name = "Application::render", skip_all)]
   fn render(&mut self) -> Result<(), Box<dyn Error>> {
-    self.terminal.draw(|frame| {
-      let layout = Application::get_layout(frame.size());
+    self.terminal.draw(|frame| self.editor.render(frame).unwrap())?;
 
-      let main_layout = layout[0];
-      self.editor.set_area(main_layout);
-
-      self.editor.render(frame, main_layout).unwrap();
-      frame.render_widget(Paragraph::new("Status line").block(Block::new()), layout[1]);
-    })?;
-
+    // TODO: Move to [Editor]
     if self.should_render_cursor {
       self.terminal.show_cursor()?;
       self.terminal.set_cursor(self.cursor.0, self.cursor.1)?;

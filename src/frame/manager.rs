@@ -11,38 +11,15 @@ use super::Frame;
 
 use crate::prelude::Result;
 
-type FrameId = u16;
-
-// struct LayoutBuilder {
-//   items: Vec<(Constraint, Frame)>,
-//   direction: Direction,
-// }
-//
-// impl From<LayoutBuilder> for ratatui::layout::Layout {
-//   fn from(value: LayoutBuilder) -> Self {
-//       use ratatui::layout::Layout;
-//     let constraints: Vec<Constraint> = value.items.iter().map(|v| v.0).collect();
-//     let items: Vec<Frame> = value.items.iter().map(|v| v.1).collect();
-//
-//     Layout::default().direction(value.direction).constraints(constraints).
-//
-//
-//   }
-// }
-
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct FrameManager {
-  frames: HashMap<FrameId, Frame>,
-  active_frame: Option<FrameId>,
-  area: Option<ratatui::layout::Rect>, // cursor_manager: Cursor,
+  frames: HashMap<u16, Frame>,
+  active_frame: Option<u16>,
+  area: Option<ratatui::layout::Rect>,
   action_sender: Option<UnboundedSender<Action>>,
 }
 
 impl FrameManager {
-  pub fn new() -> Self {
-    FrameManager { frames: HashMap::default(), active_frame: None, area: None, action_sender: None }
-  }
-
   pub fn set_area(&mut self, area: ratatui::layout::Rect) {
     self.area = Some(area);
   }
@@ -60,6 +37,8 @@ impl FrameManager {
       self.action_sender.clone().expect("internal_error: No action sender"),
     )?;
 
+    frame.init();
+
     self.frames.insert(id, frame);
 
     Ok(id)
@@ -72,7 +51,7 @@ impl FrameManager {
   // TODO: Should this make it focus?
   pub fn fill_window(&mut self, index: u16, component: Box<dyn Component>) -> Option<()> {
     let frame = self.frames.get_mut(&index)?;
-    frame.buffer = component;
+    frame.replace_buffer(component);
 
     tracing::info!("Filling buffer: {}", index);
     self.active_frame = Some(index);
@@ -88,11 +67,6 @@ impl FrameManager {
   pub fn send_input(&mut self, _key: KeyEvent) {
     println!("Sending input {:?}", _key.code);
   }
-
-  // pub fn cursor_position(&self) -> (usize, usize) {
-  //   self.cursor_manager.position
-  // }
-  //
 
   fn active_frame_mut(&mut self) -> Option<&mut Frame> {
     self.active_frame.as_mut().map(|v| self.frames.get_mut(v).unwrap())
@@ -137,14 +111,13 @@ impl Component for FrameManager {
     &mut self,
     mut mouse: crossterm::event::MouseEvent,
   ) -> Result<Option<Action>> {
+    let area = self.area.unwrap();
     let active = match self.active_frame {
       Some(active) => active,
       None => return Ok(None),
     };
 
     let frame = self.frames.get_mut(&active).expect("Active frame must exist");
-
-    let area = self.area.unwrap();
 
     let x = mouse.column - area.x;
     let y = mouse.row - area.y;
