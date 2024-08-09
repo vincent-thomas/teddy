@@ -21,6 +21,12 @@ jobs:
     - uses: DeterminateSystems/nix-installer-action@main
     - uses: DeterminateSystems/magic-nix-cache-action@main
     - uses: DeterminateSystems/flake-checker-action@main 
+    - name: ⚡ Cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
     - uses: rrbutani/use-nix-shell-action@v1
     - name: Run tests
       run: cargo nextest r --workspace
