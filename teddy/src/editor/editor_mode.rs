@@ -3,7 +3,6 @@
 #[derive(Default, Debug, PartialEq)]
 pub enum EditorMode {
   #[default]
-  Normal,
   Visual,
   Insert,
   Command,
@@ -30,22 +29,16 @@ pub enum EditorMode {
 impl EditorMode {
   pub fn validate_mode_switch(&self, new_mode: &EditorMode) -> bool {
     match self {
-      EditorMode::Normal => match new_mode {
-        EditorMode::Insert => true,
-        EditorMode::Visual => true,
-        EditorMode::Command => true,
-        _ => false,
-      },
       EditorMode::Insert => match new_mode {
-        EditorMode::Normal => true,
+        EditorMode::Visual => true,
         _ => false,
       },
       EditorMode::Visual => match new_mode {
-        EditorMode::Normal => true,
+        EditorMode::Visual => true,
         _ => false,
       },
       EditorMode::Command => match new_mode {
-        EditorMode::Normal => true,
+        EditorMode::Visual => true,
         _ => false,
       },
     }

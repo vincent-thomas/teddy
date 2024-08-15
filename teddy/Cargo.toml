@@ -1,0 +1,20 @@
+[package]
+name = "teddy"
+version = "0.1.0"
+edition = "2021"
+
+
+[dependencies]
+teddy_cursor = { path = "../teddy_cursor" }
+teddy_events = { path = "../teddy_events" }
+
+tokio = {workspace = true}
+crossterm = { workspace = true }
+tracing = { workspace  = true }
+
+ropey = "1.6.1"
+clier_parser = "0.7.4"
+ratatui = "0.27.0"
+tracing-subscriber = { version = "0.3.18", features = ["registry", "fmt"] }
+color-eyre = "0.6.3"
+rand = "0.8.5"

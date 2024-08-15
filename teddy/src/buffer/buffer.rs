@@ -82,7 +82,6 @@ impl Component for FileBuffer {
     &mut self,
     mouse: crossterm::event::MouseEvent,
   ) -> Result<Option<crate::action::Action>> {
-    tracing::trace!("Got there");
     Ok(None)
   }
 }
