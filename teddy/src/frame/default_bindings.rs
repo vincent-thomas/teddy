@@ -230,6 +230,11 @@ create_moveto_mode_action!(MoveToInsertMode, Insert);
 #[derive(Debug)]
 pub struct SelectWordForward;
 
+const WORD_SEPEERATORS: &[char] = &[
+  ' ', '\t', '\n', '?', '!', '.', ',', ';', ':', '\'', '(', ')', '{', '}', '[', ']', '/', '-', '+',
+  '*', '=',
+];
+
 impl BindAction for SelectWordForward {
   fn act(&self, frame: &mut InnerFrame) -> Result<Option<Action>> {
     let buff = frame.buffer.get_buff();
@@ -240,8 +245,7 @@ impl BindAction for SelectWordForward {
     let iter = line.chars_at(cursor.0 + 1).enumerate();
 
     for (index, _char) in iter {
-      if _char == ' ' || _char == '\n' {
-        // tracing::trace!("{:#?} {}", char, index);
+      if WORD_SEPEERATORS.contains(&_char) {
         let pos_togo = (index + cursor.0 + 1, cursor.1);
         let result = frame.cursor.request_goto(pos_togo, Some(line.len_chars()));
 
