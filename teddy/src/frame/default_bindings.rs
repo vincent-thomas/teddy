@@ -239,9 +239,9 @@ impl BindAction for SelectWordForward {
 
     let iter = line.chars_at(cursor.0 + 1).enumerate();
 
-    for (index, char) in iter {
-      if char == ' ' {
-        tracing::trace!("{:#?} {}", char, index);
+    for (index, _char) in iter {
+      if _char == ' ' || _char == '\n' {
+        // tracing::trace!("{:#?} {}", char, index);
         let pos_togo = (index + cursor.0 + 1, cursor.1);
         let result = frame.cursor.request_goto(pos_togo, Some(line.len_chars()));
 
