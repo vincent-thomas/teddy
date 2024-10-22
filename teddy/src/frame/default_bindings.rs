@@ -1,9 +1,9 @@
 use crate::editor::editor_mode::EditorMode;
 use crate::prelude::*;
-use ropey::Rope;
+use teddy_core::ropey::Rope;
 use teddy_cursor::cursor_line::CursorLines;
 
-use crate::action::Action;
+use crate::action::{Action, Notification, NotificationLevel};
 
 use super::keybinding::BindAction;
 use super::InnerFrame;
@@ -58,7 +58,7 @@ impl BindAction for MoveRightAction {
     let buffer = frame.buffer.get_buff();
     let (_, cursor_y) = frame.cursor.get();
 
-    let cursor_lines = get_cursor_lines_from_buffer(cursor_y, buffer);
+    let cursor_lines = get_cursor_lines_from_buffer(cursor_y, &buffer);
     frame.cursor.move_right(&cursor_lines);
 
     Ok(None)
@@ -73,7 +73,7 @@ impl BindAction for MoveUpAction {
     let buffer = frame.buffer.get_buff();
     let (_, cursor_y) = frame.cursor.get();
 
-    let cursor_lines = get_cursor_lines_from_buffer(cursor_y, buffer);
+    let cursor_lines = get_cursor_lines_from_buffer(cursor_y, &buffer);
     frame.cursor.move_up(&cursor_lines);
 
     Ok(None)
@@ -88,7 +88,7 @@ impl BindAction for MoveDownAction {
     let buffer = frame.buffer.get_buff();
     let (_, cursor_y) = frame.cursor.get();
 
-    let cursor_lines = get_cursor_lines_from_buffer(cursor_y, buffer);
+    let cursor_lines = get_cursor_lines_from_buffer(cursor_y, &buffer);
     frame.cursor.move_down(&cursor_lines);
 
     Ok(None)
@@ -147,7 +147,7 @@ impl BindAction for ToEndParagraph {
   fn act(&self, frame: &mut InnerFrame) -> Result<Option<Action>> {
     let buffer = frame.buffer.get_buff();
     let cursor = frame.cursor.get();
-    let mut index = cursor.1;
+    let mut index = cursor.1 + 1;
 
     let iter = buffer.lines_at(index);
 
@@ -230,9 +230,9 @@ create_moveto_mode_action!(MoveToInsertMode, Insert);
 #[derive(Debug)]
 pub struct SelectWordForward;
 
-const WORD_SEPEERATORS: &[char] = &[
+const WORD_SEPERATORS: &[char] = &[
   ' ', '\t', '\n', '?', '!', '.', ',', ';', ':', '\'', '(', ')', '{', '}', '[', ']', '/', '-', '+',
-  '*', '=',
+  '*', '=', '"',
 ];
 
 impl BindAction for SelectWordForward {
@@ -244,16 +244,101 @@ impl BindAction for SelectWordForward {
 
     let iter = line.chars_at(cursor.0 + 1).enumerate();
 
+    let mut have_met_seperator = WORD_SEPERATORS.contains(&line.char(cursor.0));
+
     for (index, _char) in iter {
-      if WORD_SEPEERATORS.contains(&_char) {
+      if WORD_SEPERATORS.contains(&_char) {
+        have_met_seperator = true;
+      }
+
+      if have_met_seperator && !WORD_SEPERATORS.contains(&_char) {
         let pos_togo = (index + cursor.0 + 1, cursor.1);
+
         let result = frame.cursor.request_goto(pos_togo, Some(line.len_chars()));
 
         assert!(result);
+
         break;
       }
     }
 
+    // Find the next word last index
+
+    Ok(None)
+  }
+}
+
+#[derive(Debug)]
+pub struct GotoNextWord;
+
+impl BindAction for GotoNextWord {
+  fn act(&self, frame: &mut InnerFrame) -> Result<Option<Action>> {
+    let buff = frame.buffer.get_buff();
+    let cursor = frame.cursor.get();
+
+    let line = buff.line(cursor.1);
+
+    let iter = line.chars_at(cursor.0);
+
+    let mut has_met_whitespace = false;
+    let mut index = cursor.0;
+
+    for _char in iter {
+      tracing::trace!("{:?}", _char);
+      if has_met_whitespace && !_char.is_whitespace() {
+        let pos_togo = (index, cursor.1);
+        let result = frame.cursor.request_goto(pos_togo, Some(line.len_chars()));
+        assert!(result);
+        return Ok(None);
+      }
+      if _char.is_whitespace() {
+        tracing::trace!("met whitespace");
+        has_met_whitespace = true;
+      }
+
+      index += 1;
+    }
+    Ok(None)
+  }
+}
+
+#[derive(Debug)]
+pub struct GotoPreviousWord;
+
+impl BindAction for GotoPreviousWord {
+  fn act(&self, frame: &mut InnerFrame) -> Result<Option<Action>> {
+    let buff = frame.buffer.get_buff();
+    let cursor = frame.cursor.get();
+
+    let line = buff.line(cursor.1);
+
+    let iter = line.chars_at(cursor.0).reversed();
+
+    let mut has_met_whitespace = false;
+    let mut index = cursor.0 - 1;
+
+    for _char in iter {
+      tracing::trace!("{:?}", _char);
+
+      if has_met_whitespace && !_char.is_whitespace() {
+        let pos_togo = (index, cursor.1);
+        let result = frame.cursor.request_goto(pos_togo, Some(index));
+        assert!(result);
+        return Ok(None);
+      }
+
+      if _char.is_whitespace() {
+        has_met_whitespace = true;
+      }
+
+      if index == 0 {
+        let notification =
+          Notification::new(NotificationLevel::Info, "No other word before this one".to_string());
+        return Ok(Some(Action::AttachNotification(notification)));
+      }
+
+      index -= 1;
+    }
     Ok(None)
   }
 }

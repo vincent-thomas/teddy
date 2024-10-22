@@ -5,12 +5,12 @@ use std::{
 };
 
 use ratatui::widgets::Paragraph;
-use ropey::Rope;
+use teddy_core::ropey::Rope;
 
 use crate::component::Component;
 
 pub trait Buffer {
-  fn get_buff(&self) -> &Rope;
+  fn get_buff(&self) -> Rope;
 }
 
 #[derive(Default, Debug)]
@@ -25,8 +25,8 @@ struct FileMetadata {
 }
 
 impl Buffer for FileBuffer {
-  fn get_buff(&self) -> &Rope {
-    &self.raw_buffer
+  fn get_buff(&self) -> Rope {
+    self.raw_buffer.clone()
   }
 }
 impl FileBuffer {
@@ -35,7 +35,7 @@ impl FileBuffer {
 
     let body = fs::read_to_string(&path).unwrap();
 
-    let text = ropey::Rope::from(body.strip_suffix('\n').unwrap());
+    let text = Rope::from(body.strip_suffix('\n').unwrap());
 
     let os_str: String = path.to_str().unwrap().to_string();
 
@@ -47,7 +47,7 @@ impl FileBuffer {
   pub(crate) fn set_path(&mut self, path: Box<Path>) {
     // TODO: Fixa error handling.
     let file = File::open(&path).unwrap();
-    let text = ropey::Rope::from_reader(file).unwrap();
+    let text = Rope::from_reader(file).unwrap();
 
     let os_str: String = path.to_str().unwrap().to_string();
 

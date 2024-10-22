@@ -65,7 +65,7 @@ impl Frame {
   pub fn new(render_area: Rect) -> Self {
     let inner = InnerFrame {
       cursor: Cursor::default(),
-      selection: Selection::default(),
+      selection: Selection::new(0, 0, 0),
       buffer: Box::new(PlaceholderBuffer::default()),
     };
     Frame {
@@ -88,7 +88,7 @@ impl Frame {
 }
 
 impl Buffer for Frame {
-  fn get_buff(&self) -> &ropey::Rope {
+  fn get_buff(&self) -> teddy_core::ropey::Rope {
     unimplemented!("This should stay this way")
   }
 }
@@ -101,10 +101,12 @@ impl Component for Frame {
   }
 
   fn init(&mut self) -> Result<()> {
-    self
+    let sender = self
       .action_sender
       .as_ref()
       .expect("internal_error: register_action_handler should be called before init in Frame");
+    //sender.send(Action::ShowCursor)?;
+
     self.registered_keybindings.register(KeyBinding::char('h'), MoveLeftAction);
     self.registered_keybindings.register(KeyBinding::char('l'), MoveRightAction);
     self.registered_keybindings.register(KeyBinding::char('k'), MoveUpAction);
@@ -126,6 +128,9 @@ impl Component for Frame {
     self.registered_keybindings.register(KeyBinding::char('0'), MoveStartOfLine);
 
     self.registered_keybindings.register(KeyBinding::char('w'), SelectWordForward);
+    self.registered_keybindings.register(KeyBinding::char('W'), GotoNextWord);
+
+    self.registered_keybindings.register(KeyBinding::char('B'), GotoPreviousWord);
 
     Ok(())
   }
@@ -149,7 +154,7 @@ impl Component for Frame {
 
     let cursor = self.inner.cursor.get();
     let sender = self.sender();
-    sender.send(Action::MoveCursor(cursor.0, cursor.1))?;
+    //sender.send(Action::MoveCursor(cursor.0, cursor.1))?;
 
     Ok(action)
   }
@@ -167,8 +172,8 @@ impl Component for Frame {
         if let Some(buff_line) = buff.get_line(mouse.row.into()) {
           if self.inner.cursor.request_goto(pos, buff_line.as_str().map(|v| v.len())) {
             let sender = self.action_sender.as_mut().unwrap();
-            sender.send(Action::ShowCursor)?;
-            sender.send(Action::MoveCursor(mouse.column.into(), mouse.row.into()))?;
+            //sender.send(Action::ShowCursor)?;
+            //sender.send(Action::MoveCursor(mouse.column.into(), mouse.row.into()))?;
           }
         }
         Ok(None)

@@ -3,18 +3,27 @@ use crate::component::Component;
 use super::buffer::Buffer;
 use crate::prelude::Result;
 
-#[derive(Default)]
+use ratatui::text::Text;
+use teddy_core::ropey;
+
 pub struct PlaceholderBuffer(ropey::Rope);
 
+impl Default for PlaceholderBuffer {
+  fn default() -> Self {
+    Self(ropey::Rope::from_str("Placeholder text for a placeholder thing"))
+  }
+}
+
 impl Buffer for PlaceholderBuffer {
-  fn get_buff(&self) -> &ropey::Rope {
-    &self.0
+  fn get_buff(&self) -> ropey::Rope {
+    self.0.clone()
   }
 }
 
 impl Component for PlaceholderBuffer {
   fn draw(&mut self, frame: &mut ratatui::Frame, area: ratatui::prelude::Rect) -> Result<()> {
-    todo!()
+    frame.render_widget(Text::from(self.0.to_string()), area);
+    Ok(())
   }
 
   fn handle_key_event(

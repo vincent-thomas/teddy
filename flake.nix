@@ -10,27 +10,40 @@
     };
   };
 
-  outputs = { self, nixpkgs, rust-overlay, flake-utils, ... }:
-    flake-utils.lib.eachDefaultSystem (system:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      rust-overlay,
+      flake-utils,
+      ...
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
       let
         pkgs = import nixpkgs {
           inherit system;
           overlays = [ (import rust-overlay) ];
         };
-      in {
+      in
+      {
         devShell = pkgs.mkShell {
           nativeBuildInputs = with pkgs; [
             (rust-bin.stable.latest.default.override {
-              extensions = [ "rust-src" "cargo" "rustc" ];
+              extensions = [
+                "rust-src"
+                "cargo"
+                "rustc"
+              ];
             })
             gcc
           ];
 
           RUST_SRC_PATH = "${
-              pkgs.rust-bin.stable.latest.default.override {
-                extensions = [ "rust-src" ];
-              }
-            }/lib/rustlib/src/rust/library";
+            pkgs.rust-bin.stable.latest.default.override {
+              extensions = [ "rust-src" ];
+            }
+          }/lib/rustlib/src/rust/library";
 
           buildInputs = with pkgs; [
             # openssl.dev
@@ -39,8 +52,9 @@
 
             cargo-watch
             cargo-nextest
+            bacon
           ];
         };
-      });
+      }
+    );
 }
-

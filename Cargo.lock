@@ -743,12 +743,21 @@ dependencies = [
  "crossterm",
  "rand",
  "ratatui",
- "ropey",
+ "teddy_core",
  "teddy_cursor",
  "teddy_events",
  "tokio",
  "tracing",
  "tracing-subscriber",
+]
+
+[[package]]
+name = "teddy_core"
+version = "0.1.0"
+dependencies = [
+ "crossterm",
+ "ropey",
+ "tokio",
 ]
 
 [[package]]

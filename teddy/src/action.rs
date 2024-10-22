@@ -1,26 +1,24 @@
 use crate::{component::Component, editor::editor_mode::EditorMode};
 use std::{fmt::Debug, path::PathBuf};
 
-/// Every single action a component can take.
+/// Every single action a component can take outside the editor.
 pub enum Action {
   Quit,
 
   // Crossterm actions
   Resize(u16, u16),
   AttachNotification(Notification),
-  ShowCursor,
-  HideCursor,
-  MoveCursor(usize, usize),
-
+  //ShowCursor,
+  //HideCursor,
+  //MoveCursor(usize, usize),
   OpenBuffer(Box<dyn Component>),
   ReplaceActiveBuffer(Box<dyn Component>),
 
   CloseActiveBuffer,
-  WriteBuffer { buffer_id: u16 },
+  WriteActiveBuffer,
 
-  AttachLSPToCurrentBuffer,
-  DetachLSPFromBuffer { buffer_id: u16 },
-
+  //AttachLSPToCurrentBuffer,
+  //DetachLSPFromBuffer { buffer_id: u16 },
   WriteDiagnostic(Diagnostic),
   ChangeMode(EditorMode),
 }
@@ -65,21 +63,21 @@ impl Debug for Action {
     match self {
       Action::Quit => write!(f, "Action::Quit"),
       Action::Resize(x, y) => write!(f, "Action::Resize({}, {})", x, y),
-      Action::MoveCursor(_, _) => write!(f, "Action::MoveCursor"),
-      Action::HideCursor => write!(f, "Action::HideCursor"),
-      Action::ShowCursor => write!(f, "Action::ShowCursor"),
-      Action::AttachNotification(ref msg) => write!(f, "Action::WriteErrorMessage({:?})", msg),
+      //Action::MoveCursor(_, _) => write!(f, "Action::MoveCursor"),
+      //Action::HideCursor => write!(f, "Action::HideCursor"),
+      //Action::ShowCursor => write!(f, "Action::ShowCursor"),
+      Action::AttachNotification(_) => write!(f, "Action::WriteErrorMessage"),
       Action::ReplaceActiveBuffer(_) => write!(f, "Action::ReplaceActiveBuffer"),
       Action::ChangeMode(mode) => write!(f, "Action::ChangeMode({:?})", mode),
       Action::OpenBuffer(_) => write!(f, "Action::OpenBuffer"),
       Action::CloseActiveBuffer => write!(f, "Action::CloseActiveBuffer"),
-      Action::WriteBuffer { buffer_id } => {
-        write!(f, "Action::WriteBuffer {{ buffer_id: {} }}", buffer_id)
+      Action::WriteActiveBuffer => {
+        write!(f, "Action::WriteBuffer")
       }
-      Action::AttachLSPToCurrentBuffer => write!(f, "Action::AttachLSPToCurrentBuffer"),
-      Action::DetachLSPFromBuffer { buffer_id } => {
-        write!(f, "Action::DetachLSPFromBuffer {{ buffer_id: {} }}", buffer_id)
-      }
+      //Action::AttachLSPToCurrentBuffer => write!(f, "Action::AttachLSPToCurrentBuffer"),
+      //Action::DetachLSPFromBuffer { buffer_id } => {
+      //  write!(f, "Action::DetachLSPFromBuffer {{ buffer_id: {} }}", buffer_id)
+      //}
       Action::WriteDiagnostic(_) => write!(f, "Action::WriteDiagnostic"),
     }
   }

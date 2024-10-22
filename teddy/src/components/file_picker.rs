@@ -4,10 +4,12 @@ use ratatui::{
   style::{Color, Style},
   widgets::{Block, Borders},
 };
+
 use std::{
   fs::DirEntry,
   path::{Path, PathBuf},
 };
+use teddy_core::ropey;
 
 use crate::{
   buffer::buffer::{Buffer, FileBuffer},
@@ -115,8 +117,23 @@ impl FilePicker {
 }
 
 impl Buffer for FilePicker {
-  fn get_buff(&self) -> &ropey::Rope {
-    panic!("FilePicker does not have a buffer");
+  fn get_buff(&self) -> ropey::Rope {
+    let result = self.current_directory.read_dir().unwrap();
+
+    let mut nice_vec = vec![];
+
+    for item in result {
+      let file = item.unwrap();
+      let file_name = file.file_name();
+
+      nice_vec.push(file_name.into_string().unwrap());
+    }
+
+    tracing::trace!("{nice_vec:?}");
+
+    let string = nice_vec.join("\n");
+
+    ropey::Rope::from_str(&string)
   }
 }
 

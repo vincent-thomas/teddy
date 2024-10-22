@@ -1,8 +1,7 @@
-//use crossterm::event::KeyEvent;
-
 #[derive(Default, Debug, PartialEq)]
 pub enum EditorMode {
   #[default]
+  Normal,
   Visual,
   Insert,
   Command,
@@ -31,14 +30,19 @@ impl EditorMode {
     match self {
       EditorMode::Insert => match new_mode {
         EditorMode::Visual => true,
+        EditorMode::Normal => true,
         _ => false,
       },
       EditorMode::Visual => match new_mode {
         EditorMode::Visual => true,
+        EditorMode::Normal => true,
         _ => false,
       },
+      EditorMode::Normal => true,
+
       EditorMode::Command => match new_mode {
         EditorMode::Visual => true,
+        EditorMode::Normal => true,
         _ => false,
       },
     }

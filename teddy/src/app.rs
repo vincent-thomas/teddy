@@ -1,4 +1,5 @@
-use std::{error::Error, io::Stdout, path::Path, rc::Rc};
+use std::path::Path;
+use std::{error::Error, io::Stdout};
 
 use clier_parser::Argv;
 use ratatui::{
@@ -9,6 +10,8 @@ use ratatui::{
 use teddy_events::{Event, Events};
 use tokio::sync::mpsc;
 
+use crate::buffer::placeholder::PlaceholderBuffer;
+use crate::inputresolver::InputResolver;
 use crate::{
   action::{Action, Notification, NotificationLevel},
   buffer::buffer::FileBuffer,
@@ -18,22 +21,16 @@ use crate::{
   prelude::Tui,
 };
 
+/// This should only hold state and not do any rendering..
 pub struct Application {
   /// The receiver of actions from components
   action_receiver: mpsc::UnboundedReceiver<Action>,
-
   /// The sender of actions to components
   action_sender: mpsc::UnboundedSender<Action>,
+
   editor: Editor,
 
   should_quit: bool,
-
-  terminal: Tui,
-  root_area: Rect,
-  app_layout: Option<Rc<[Rect]>>,
-
-  should_render_cursor: bool,
-  cursor: (u16, u16),
 }
 
 impl Application {
@@ -41,35 +38,11 @@ impl Application {
   pub fn new(tui: CrosstermBackend<Stdout>) -> Self {
     tracing::info!("Initiating application");
 
-    let (sender, receiver) = mpsc::unbounded_channel();
+    let (action_sender, action_receiver) = mpsc::unbounded_channel();
 
-    let editor = Editor::new(sender.clone());
+    let editor = Editor::new(action_sender.clone(), tui);
 
-    let mut terminal = Terminal::new(tui).unwrap();
-
-    let root_area = terminal.get_frame().size();
-
-    Application {
-      action_receiver: receiver,
-      action_sender: sender,
-      editor,
-      should_quit: false,
-      terminal,
-
-      // UI
-      root_area,
-      app_layout: None,
-
-      should_render_cursor: false,
-      cursor: (0, 0),
-    }
-  }
-
-  fn get_layout(area: Rect) -> Rc<[Rect]> {
-    let layout =
-      Layout::vertical([Constraint::Fill(1), Constraint::Length(1), Constraint::Length(1)]);
-
-    layout.split(area)
+    Application { action_receiver, action_sender, editor, should_quit: false }
   }
 
   #[tracing::instrument(name = "Application::init", skip(self))]
@@ -85,11 +58,10 @@ impl Application {
       };
 
       self.action_sender.send(Action::OpenBuffer(boxed_buffer))?;
+    } else {
+      let placeholder = PlaceholderBuffer::default();
+      self.action_sender.send(Action::OpenBuffer(Box::new(placeholder)))?;
     }
-    let area = self.terminal.get_frame().size();
-    let layout = Application::get_layout(area);
-    self.app_layout = Some(layout.clone());
-    self.editor.set_area(layout[1]);
     Ok(())
   }
 
@@ -108,8 +80,7 @@ impl Application {
       // Rendering the application
       // This is done after handling the action to ensure the UI is updated
       // Also after the quitting because of its useless.
-      // It also needs to be first because of any [Component::init] functions needs the area
-      self.render()?;
+      self.editor.render()?;
 
       // Check for any events part of event loop
       if let Some(event) = events.next().await {
@@ -132,15 +103,15 @@ impl Application {
   async fn handle_event(&mut self, event: Event) -> Result<Option<Action>, Box<dyn Error>> {
     use crossterm::event::Event as CrosstermEvent;
     let output = match event {
-      Event::Render => self.render().map(|_| None)?,
-      Event::Crossterm(CrosstermEvent::Key(key)) => self.editor.forward_keyevent(key)?,
-      Event::Crossterm(CrosstermEvent::Mouse(mouse)) => self.editor.forward_mouseevent(mouse)?,
+      Event::Render => self.editor.render().map(|_| None)?,
+      Event::Crossterm(CrosstermEvent::Key(key)) => self.editor.keyevent(key)?,
+      Event::Crossterm(CrosstermEvent::Mouse(mouse)) => None,
       Event::Crossterm(CrosstermEvent::Resize(x, y)) => Some(Action::Resize(x, y)),
       Event::EventStreamError(err) => {
         // TODO: For now
         panic!("EventStreamError: {:?}", err);
       }
-      _ => unimplemented!(),
+      _ => unimplemented!("{:?}", event),
     };
 
     Ok(output)
@@ -157,29 +128,15 @@ impl Application {
       Action::ReplaceActiveBuffer(buffer) => {
         self.editor.replace_active_buffer(buffer)?;
       }
-      Action::Resize(_x, _y) => self.render()?,
-      Action::ShowCursor => self.should_render_cursor = true,
-      Action::HideCursor => self.should_render_cursor = false,
-      Action::MoveCursor(x, y) => self.cursor = (x.try_into().unwrap(), y.try_into().unwrap()),
+      Action::Resize(_x, _y) => self.editor.render()?,
+      Action::ChangeMode(mode) => self.editor.try_change_editor_mode(mode)?,
+      //Action::ShowCursor => self.should_render_cursor = true,
+      //Action::HideCursor => self.should_render_cursor = false,
+      //Action::MoveCursor(x, y) => self.cursor = (x.try_into().unwrap(), y.try_into().unwrap()),
       Action::CloseActiveBuffer => self.editor.remove_active_buffer()?,
-      _ => unimplemented!(),
+      Action::WriteActiveBuffer => self.editor.write_active_buffer()?,
+      _ => tracing::error!("Error: {action:?} is not implemented"),
     };
-    Ok(())
-  }
-
-  // Render the `AppWidget` as a stateful widget using `self` as the `State`
-  #[tracing::instrument(name = "Application::render", skip_all)]
-  fn render(&mut self) -> Result<(), Box<dyn Error>> {
-    self.terminal.draw(|frame| self.editor.render(frame).unwrap())?;
-
-    // TODO: Move to [Editor]
-    if self.should_render_cursor {
-      self.terminal.show_cursor()?;
-      self.terminal.set_cursor(self.cursor.0, self.cursor.1)?;
-    } else {
-      self.terminal.hide_cursor()?;
-    }
-
     Ok(())
   }
 }

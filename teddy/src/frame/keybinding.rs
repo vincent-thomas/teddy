@@ -8,10 +8,35 @@ use crate::prelude::*;
 
 use super::InnerFrame;
 
-#[derive(PartialEq, Eq, Hash, Clone, Default, Debug)]
+#[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub struct Selection {
   from: usize,
   to: usize,
+
+  file_size: usize,
+}
+
+impl Selection {
+  pub fn new(from: usize, to: usize, file_size: usize) -> Self {
+    Self { from, to, file_size }
+  }
+
+  pub fn select(&mut self, from: usize, to: usize) {
+    if from > self.file_size {
+      panic!("from is greater than file size");
+    }
+
+    if to > self.file_size {
+      panic!("to is greater than file size");
+    }
+
+    if from > to {
+      panic!("from is greater than to");
+    }
+
+    self.from = from;
+    self.to = to;
+  }
 }
 
 #[derive(PartialEq, Eq, Hash, Clone)]

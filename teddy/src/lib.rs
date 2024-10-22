@@ -8,3 +8,5 @@ pub mod components;
 pub mod editor;
 pub mod frame;
 pub mod prelude;
+
+pub mod inputresolver;

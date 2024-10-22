@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use crossterm::event::KeyEvent;
+use teddy_core::ropey;
 use tokio::sync::mpsc::UnboundedSender;
 
 use crate::action::Action;
@@ -37,7 +38,7 @@ impl FrameManager {
       self.action_sender.clone().expect("internal_error: No action sender"),
     )?;
 
-    frame.init();
+    frame.init()?;
 
     self.frames.insert(id, frame);
 
@@ -74,7 +75,7 @@ impl FrameManager {
 }
 
 impl Buffer for FrameManager {
-  fn get_buff(&self) -> &ropey::Rope {
+  fn get_buff(&self) -> ropey::Rope {
     if let Some(active_frame) = self.active_frame() {
       self.frames.get(active_frame).unwrap().get_buff()
     } else {
