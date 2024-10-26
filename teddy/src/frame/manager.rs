@@ -4,8 +4,8 @@ use crossterm::event::KeyEvent;
 use tokio::sync::mpsc::UnboundedSender;
 
 use crate::action::Action;
-use crate::buffer::Buffer;
-use crate::component::Component;
+use crate::buffers::Buffer;
+use crate::components::Component;
 
 use super::Frame;
 

@@ -1,4 +1,4 @@
-use crate::{component::Component, editor::editor_mode::EditorMode};
+use crate::{components::Component, editor::EditorMode};
 use std::{fmt::Debug, path::PathBuf};
 
 /// Every single action a component can take outside the editor.

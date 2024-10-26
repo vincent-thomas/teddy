@@ -2,7 +2,7 @@ use ratatui::{
   layout::Constraint,
   prelude::Layout,
   style::{Color, Style},
-  widgets::{Block, Borders},
+  widgets::{Block, Borders, List, ListDirection, ListItem},
 };
 
 use std::{
@@ -10,11 +10,10 @@ use std::{
   path::{Path, PathBuf},
 };
 
-use crate::{buffer::Buffer, buffers::buffer::FileBuffer, prelude::*};
+use crate::{
+  action::Action, buffers::buffer::FileBuffer, buffers::Buffer, components::Component, prelude::*,
+};
 use crossterm::event::{KeyCode, KeyEvent};
-use ratatui::widgets::{List, ListDirection, ListItem};
-
-use crate::{action::Action, component::Component};
 
 pub struct FilePicker {
   current_directory: PathBuf,

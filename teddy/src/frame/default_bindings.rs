@@ -1,4 +1,4 @@
-use crate::editor::editor_mode::EditorMode;
+use crate::editor::EditorMode;
 use crate::prelude::*;
 use ropey::Rope;
 use teddy_cursor::cursor_line::CursorLines;

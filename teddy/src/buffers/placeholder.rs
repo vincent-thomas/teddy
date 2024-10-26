@@ -1,5 +1,5 @@
-use crate::buffer::Buffer;
-use crate::component::Component;
+use crate::buffers::Buffer;
+use crate::components::Component;
 
 use crate::prelude::Result;
 

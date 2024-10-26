@@ -1,13 +1,6 @@
-use std::{collections::HashMap, io::Stdout};
-
-use crossterm::event::{KeyCode, KeyEvent, KeyEventState, KeyModifiers};
-use ratatui::prelude::CrosstermBackend;
-use tokio::sync::mpsc;
-
-use crate::{
-  action::{Action, Notification, NotificationLevel},
-  editor::{Editor, EditorMode},
-};
+use crate::{action::Action, editor::EditorMode};
+use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct InputResolver {

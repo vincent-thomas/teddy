@@ -1,4 +1,4 @@
-use crate::{buffer::Buffer, prelude::Result};
+use crate::{buffers::Buffer, components::Component, prelude::Result};
 use std::{
   fs::{self, File},
   path::Path,
@@ -6,8 +6,6 @@ use std::{
 
 use ratatui::widgets::Paragraph;
 use ropey::Rope;
-
-use crate::component::Component;
 
 #[derive(Default, Debug)]
 pub struct FileBuffer {

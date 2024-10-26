@@ -8,8 +8,6 @@ use crate::crossterm::crossterm_stream;
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 pub enum StreamName {
   CrossTerm,
-  Renders,
-  Render,
 }
 
 #[derive(Debug)]
@@ -27,10 +25,7 @@ pub struct Events {
 
 impl Default for Events {
   fn default() -> Self {
-    let streams = StreamMap::from_iter([
-      (StreamName::CrossTerm, crossterm_stream()),
-      //(StreamName::Renders, render_stream()),
-    ]);
+    let streams = StreamMap::from_iter([(StreamName::CrossTerm, crossterm_stream())]);
     Events { streams }
   }
 }

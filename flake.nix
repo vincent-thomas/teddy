@@ -25,31 +25,25 @@
           inherit system;
           overlays = [ (import rust-overlay) ];
         };
+
+        rustBin = pkgs.rust-bin.stable.latest.default.override {
+          extensions = [
+            "rust-src"
+            "cargo"
+            "rustc"
+          ];
+        };
       in
       {
         devShell = pkgs.mkShell {
           nativeBuildInputs = with pkgs; [
-            (rust-bin.stable.latest.default.override {
-              extensions = [
-                "rust-src"
-                "cargo"
-                "rustc"
-              ];
-            })
+            rustBin
             gcc
           ];
 
-          RUST_SRC_PATH = "${
-            pkgs.rust-bin.stable.latest.default.override {
-              extensions = [ "rust-src" ];
-            }
-          }/lib/rustlib/src/rust/library";
+          RUST_SRC_PATH = "${rustBin}/lib/rustlib/src/rust/library";
 
           buildInputs = with pkgs; [
-            # openssl.dev
-            # glib.dev
-            # pkg-config
-
             cargo-watch
             cargo-nextest
             bacon

@@ -1,5 +1,4 @@
-use std::path::Path;
-use std::{error::Error, io::Stdout};
+use std::{error::Error, io::Stdout, path::Path};
 
 use clier_parser::Argv;
 use ratatui::{
@@ -10,16 +9,12 @@ use ratatui::{
 use teddy_events::{Event, Events};
 use tokio::sync::mpsc;
 
-use crate::buffers::buffer::FileBuffer;
-use crate::buffers::placeholder::PlaceholderBuffer;
-use crate::inputresolver::InputResolver;
-use crate::ui::ui;
 use crate::{
   action::{Action, Notification, NotificationLevel},
-  component::Component,
-  components::file_picker::FilePicker,
+  buffers::{buffer::FileBuffer, placeholder::PlaceholderBuffer},
+  components::{file_picker::FilePicker, Component},
   editor::Editor,
-  prelude::Tui,
+  ui::ui,
 };
 
 /// This should only hold state and not do any rendering..

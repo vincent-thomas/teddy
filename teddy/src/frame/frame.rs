@@ -5,12 +5,12 @@ use ratatui::layout::Rect;
 use teddy_cursor::Cursor;
 use tokio::sync::mpsc::UnboundedSender;
 
-use crate::buffer::Buffer;
 use crate::buffers::placeholder::PlaceholderBuffer;
+use crate::buffers::Buffer;
 use crate::prelude::*;
 
 use crate::action::Action;
-use crate::component::Component;
+use crate::components::Component;
 
 use super::default_bindings::*;
 use super::keybinding::{KeyBinding, RegisteredKeyBindings, Selection};

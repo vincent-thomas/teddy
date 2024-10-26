@@ -1,25 +1,18 @@
 use std::io::Stdout;
 
-use crossterm::event::{KeyEvent, MouseEvent};
-use ratatui::{
-  layout::{Constraint, Direction, Layout, Rect},
-  prelude::*,
-  style::Style,
-  text::Text,
-  Frame, Terminal,
-};
+use crossterm::event::KeyEvent;
+use ratatui::{layout::Rect, prelude::*, Terminal};
 use teddy_cursor::Cursor;
 use tokio::sync::mpsc::UnboundedSender;
 
 use crate::{
   action::Action,
-  component::Component,
+  components::Component,
+  editor::EditorMode,
   frame::manager::FrameManager,
   inputresolver::{CursorMovement, InputResolver, InputResult},
   prelude::Result,
 };
-
-use super::EditorMode;
 
 pub struct Editor {
   pub frames: FrameManager,
@@ -60,15 +53,19 @@ impl Editor {
 
             match test {
               CursorMovement::Down => {
+                todo!();
                 //self.cursor.move_down();
               }
               CursorMovement::Up => {
+                todo!();
                 //self.cursor.move_up();
               }
               CursorMovement::Left => {
+                todo!();
                 //self.cursor.move_left();
               }
               CursorMovement::Right => {
+                todo!();
                 //self.cursor.move_right();
               }
             }

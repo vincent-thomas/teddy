@@ -4,7 +4,7 @@ use ratatui::{
   text::Text,
 };
 
-use crate::{component::Component, editor::Editor};
+use crate::{components::Component, editor::Editor};
 
 pub fn ui(editor: &mut Editor) -> Result<(), Box<dyn std::error::Error>> {
   editor.terminal.draw(|frame| {
