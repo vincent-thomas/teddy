@@ -1,4 +1,4 @@
-use crate::{buffer::buffer::Buffer, prelude::Result};
+use crate::{buffer::Buffer, prelude::Result};
 use crossterm::event::{KeyEvent, MouseEvent};
 use ratatui::{layout::Rect, Frame};
 use teddy_events::Event;

@@ -9,12 +9,8 @@ use std::{
   fs::DirEntry,
   path::{Path, PathBuf},
 };
-use teddy_core::ropey;
 
-use crate::{
-  buffer::buffer::{Buffer, FileBuffer},
-  prelude::*,
-};
+use crate::{buffer::Buffer, buffers::buffer::FileBuffer, prelude::*};
 use crossterm::event::{KeyCode, KeyEvent};
 use ratatui::widgets::{List, ListDirection, ListItem};
 
@@ -164,7 +160,6 @@ impl Component for FilePicker {
     frame.render_widget(
       ratatui::widgets::Paragraph::new(format!(" {}$", cwd))
         .style(Style::default().fg(Color::Green)),
-      //.block(Block::new().borders(Borders::BOTTOM)),
       layout[0],
     );
     frame.render_widget(Block::new().borders(Borders::BOTTOM), layout[1]);

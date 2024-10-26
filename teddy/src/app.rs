@@ -10,11 +10,12 @@ use ratatui::{
 use teddy_events::{Event, Events};
 use tokio::sync::mpsc;
 
-use crate::buffer::placeholder::PlaceholderBuffer;
+use crate::buffers::buffer::FileBuffer;
+use crate::buffers::placeholder::PlaceholderBuffer;
 use crate::inputresolver::InputResolver;
+use crate::ui::ui;
 use crate::{
   action::{Action, Notification, NotificationLevel},
-  buffer::buffer::FileBuffer,
   component::Component,
   components::file_picker::FilePicker,
   editor::Editor,
@@ -40,9 +41,12 @@ impl Application {
 
     let (action_sender, action_receiver) = mpsc::unbounded_channel();
 
-    let editor = Editor::new(action_sender.clone(), tui);
-
-    Application { action_receiver, action_sender, editor, should_quit: false }
+    Application {
+      editor: Editor::new(action_sender.clone(), tui),
+      action_receiver,
+      action_sender,
+      should_quit: false,
+    }
   }
 
   #[tracing::instrument(name = "Application::init", skip(self))]
@@ -80,7 +84,9 @@ impl Application {
       // Rendering the application
       // This is done after handling the action to ensure the UI is updated
       // Also after the quitting because of its useless.
-      self.editor.render()?;
+      //self.editor.render()?;
+
+      ui(&mut self.editor)?;
 
       // Check for any events part of event loop
       if let Some(event) = events.next().await {
@@ -103,7 +109,7 @@ impl Application {
   async fn handle_event(&mut self, event: Event) -> Result<Option<Action>, Box<dyn Error>> {
     use crossterm::event::Event as CrosstermEvent;
     let output = match event {
-      Event::Render => self.editor.render().map(|_| None)?,
+      Event::Render => ui(&mut self.editor).map(|_| None)?,
       Event::Crossterm(CrosstermEvent::Key(key)) => self.editor.keyevent(key)?,
       Event::Crossterm(CrosstermEvent::Mouse(mouse)) => None,
       Event::Crossterm(CrosstermEvent::Resize(x, y)) => Some(Action::Resize(x, y)),
@@ -128,11 +134,8 @@ impl Application {
       Action::ReplaceActiveBuffer(buffer) => {
         self.editor.replace_active_buffer(buffer)?;
       }
-      Action::Resize(_x, _y) => self.editor.render()?,
+      Action::Resize(_x, _y) => ui(&mut self.editor)?,
       Action::ChangeMode(mode) => self.editor.try_change_editor_mode(mode)?,
-      //Action::ShowCursor => self.should_render_cursor = true,
-      //Action::HideCursor => self.should_render_cursor = false,
-      //Action::MoveCursor(x, y) => self.cursor = (x.try_into().unwrap(), y.try_into().unwrap()),
       Action::CloseActiveBuffer => self.editor.remove_active_buffer()?,
       Action::WriteActiveBuffer => self.editor.write_active_buffer()?,
       _ => tracing::error!("Error: {action:?} is not implemented"),

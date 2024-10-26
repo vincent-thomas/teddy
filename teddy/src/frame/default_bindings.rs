@@ -1,6 +1,6 @@
 use crate::editor::editor_mode::EditorMode;
 use crate::prelude::*;
-use teddy_core::ropey::Rope;
+use ropey::Rope;
 use teddy_cursor::cursor_line::CursorLines;
 
 use crate::action::{Action, Notification, NotificationLevel};

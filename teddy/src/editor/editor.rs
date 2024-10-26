@@ -8,23 +8,25 @@ use ratatui::{
   text::Text,
   Frame, Terminal,
 };
+use teddy_cursor::Cursor;
 use tokio::sync::mpsc::UnboundedSender;
 
 use crate::{
   action::Action,
   component::Component,
   frame::manager::FrameManager,
-  inputresolver::{InputResolver, InputResult},
+  inputresolver::{CursorMovement, InputResolver, InputResult},
   prelude::Result,
 };
 
-use super::editor_mode::EditorMode;
+use super::EditorMode;
 
 pub struct Editor {
-  frames: FrameManager,
-  terminal: Terminal<CrosstermBackend<Stdout>>,
+  pub frames: FrameManager,
+  pub terminal: Terminal<CrosstermBackend<Stdout>>,
   editor_mode: EditorMode,
 
+  cursor: Cursor,
   input_resolver: InputResolver,
 
   sender: UnboundedSender<Action>,
@@ -55,6 +57,21 @@ impl Editor {
           }
           InputResult::CursorIntent(test) => {
             tracing::trace!("caused cursor intent: {:?}", test);
+
+            match test {
+              CursorMovement::Down => {
+                //self.cursor.move_down();
+              }
+              CursorMovement::Up => {
+                //self.cursor.move_up();
+              }
+              CursorMovement::Left => {
+                //self.cursor.move_left();
+              }
+              CursorMovement::Right => {
+                //self.cursor.move_right();
+              }
+            }
           }
         }
       }
@@ -78,6 +95,7 @@ impl Editor {
       frames,
       editor_mode: EditorMode::default(),
       terminal,
+      cursor: Cursor::with_position(0, 0),
       input_resolver: InputResolver::default(),
       sender,
     }
@@ -122,25 +140,5 @@ impl Editor {
 impl Editor {
   pub fn set_area(&mut self, area: Rect) {
     self.frames.set_area(area);
-  }
-  pub fn render(&mut self) -> Result<()> {
-    self.terminal.draw(|frame| {
-      let area = frame.size();
-
-      let layout =
-        Layout::vertical([Constraint::Fill(1), Constraint::Length(1), Constraint::Length(1)])
-          .split(area);
-      self.frames.set_area(layout[0]);
-      self.frames.draw(frame, layout[0]).unwrap();
-
-      let chunks = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints([Constraint::Length(10), Constraint::Length(10)])
-        .split(layout[1]);
-      frame.render_widget(Text::styled("Status", Style::default()), chunks[0]);
-      frame.render_widget(Text::styled("Mode", Style::default()), chunks[1]);
-    });
-
-    Ok(())
   }
 }

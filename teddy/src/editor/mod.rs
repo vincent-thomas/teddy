@@ -1,5 +1,4 @@
 mod editor;
-pub mod editor_mode;
-pub mod macros;
+mod editor_mode;
 pub use editor::*;
-mod error;
+pub use editor_mode::*;

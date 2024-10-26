@@ -1,10 +1,9 @@
+use crate::buffer::Buffer;
 use crate::component::Component;
 
-use super::buffer::Buffer;
 use crate::prelude::Result;
 
 use ratatui::text::Text;
-use teddy_core::ropey;
 
 pub struct PlaceholderBuffer(ropey::Rope);
 

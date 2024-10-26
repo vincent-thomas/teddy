@@ -1,17 +1,13 @@
-use crate::prelude::Result;
+use crate::{buffer::Buffer, prelude::Result};
 use std::{
   fs::{self, File},
   path::Path,
 };
 
 use ratatui::widgets::Paragraph;
-use teddy_core::ropey::Rope;
+use ropey::Rope;
 
 use crate::component::Component;
-
-pub trait Buffer {
-  fn get_buff(&self) -> Rope;
-}
 
 #[derive(Default, Debug)]
 pub struct FileBuffer {

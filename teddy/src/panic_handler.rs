@@ -9,6 +9,7 @@ pub fn install() -> Result<(), Box<dyn Error>> {
     if let Err(e) = tui::restore() {
       eprintln!("Failed to restore terminal settings: {:?}", e);
     }
+
     default_hook(info);
   }));
 

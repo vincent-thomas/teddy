@@ -6,7 +6,7 @@ use tokio::sync::mpsc;
 
 use crate::{
   action::{Action, Notification, NotificationLevel},
-  editor::{editor_mode::EditorMode, Editor},
+  editor::{Editor, EditorMode},
 };
 
 #[derive(Debug)]
@@ -76,7 +76,6 @@ impl InputResolver {
       }
 
       (KeyModifiers::NONE, KeyCode::Char('q')) if self.macro_store_tracker.is_none() => {
-        tracing::trace!("yess");
         self.macro_store_tracker = Some(MacroStoreTracker::ChoosingRegistry);
         None
       }
@@ -115,6 +114,19 @@ impl InputResolver {
       }
       (KeyModifiers::NONE, KeyCode::Char('v')) => {
         Some(vec![InputResult::CausedAction(Action::ChangeMode(EditorMode::Visual))])
+      }
+
+      (KeyModifiers::NONE, KeyCode::Char('l')) => {
+        Some(vec![InputResult::CursorIntent(CursorMovement::Right)])
+      }
+      (KeyModifiers::NONE, KeyCode::Char('k')) => {
+        Some(vec![InputResult::CursorIntent(CursorMovement::Up)])
+      }
+      (KeyModifiers::NONE, KeyCode::Char('j')) => {
+        Some(vec![InputResult::CursorIntent(CursorMovement::Down)])
+      }
+      (KeyModifiers::NONE, KeyCode::Char('h')) => {
+        Some(vec![InputResult::CursorIntent(CursorMovement::Left)])
       }
       _ => None,
     }

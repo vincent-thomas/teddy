@@ -5,11 +5,11 @@ use ratatui::layout::Rect;
 use teddy_cursor::Cursor;
 use tokio::sync::mpsc::UnboundedSender;
 
+use crate::buffer::Buffer;
+use crate::buffers::placeholder::PlaceholderBuffer;
 use crate::prelude::*;
 
 use crate::action::Action;
-use crate::buffer::buffer::Buffer;
-use crate::buffer::placeholder::PlaceholderBuffer;
 use crate::component::Component;
 
 use super::default_bindings::*;
@@ -88,7 +88,7 @@ impl Frame {
 }
 
 impl Buffer for Frame {
-  fn get_buff(&self) -> teddy_core::ropey::Rope {
+  fn get_buff(&self) -> ropey::Rope {
     unimplemented!("This should stay this way")
   }
 }
@@ -106,12 +106,12 @@ impl Component for Frame {
       .as_ref()
       .expect("internal_error: register_action_handler should be called before init in Frame");
     //sender.send(Action::ShowCursor)?;
-
-    self.registered_keybindings.register(KeyBinding::char('h'), MoveLeftAction);
-    self.registered_keybindings.register(KeyBinding::char('l'), MoveRightAction);
-    self.registered_keybindings.register(KeyBinding::char('k'), MoveUpAction);
-    self.registered_keybindings.register(KeyBinding::char('j'), MoveDownAction);
-
+    //
+    //self.registered_keybindings.register(KeyBinding::char('h'), MoveLeftAction);
+    //self.registered_keybindings.register(KeyBinding::char('l'), MoveRightAction);
+    //self.registered_keybindings.register(KeyBinding::char('k'), MoveUpAction);
+    //self.registered_keybindings.register(KeyBinding::char('j'), MoveDownAction);
+    //
     self.registered_keybindings.register(KeyBinding::keycode(KeyCode::Left), MoveLeftAction);
     self.registered_keybindings.register(KeyBinding::keycode(KeyCode::Right), MoveRightAction);
     self.registered_keybindings.register(KeyBinding::keycode(KeyCode::Up), MoveUpAction);

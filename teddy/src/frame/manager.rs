@@ -1,11 +1,10 @@
 use std::collections::HashMap;
 
 use crossterm::event::KeyEvent;
-use teddy_core::ropey;
 use tokio::sync::mpsc::UnboundedSender;
 
 use crate::action::Action;
-use crate::buffer::buffer::Buffer;
+use crate::buffer::Buffer;
 use crate::component::Component;
 
 use super::Frame;

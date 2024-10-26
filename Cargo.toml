@@ -1,7 +1,7 @@
 
 [workspace]
 resolver = "2"
-members = ["teddy_cursor", "teddy", "teddy_events", "teddy_core"]
+members = ["teddy_cursor", "teddy", "teddy_events"]
 
 [workspace.dependencies]
 tokio = { version = "1.39", features = ["sync", "rt", "macros", "rt-multi-thread"]}
