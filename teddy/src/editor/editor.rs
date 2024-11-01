@@ -10,7 +10,7 @@ use crate::{
   components::Component,
   editor::EditorMode,
   frame::manager::FrameManager,
-  inputresolver::{CursorMovement, InputResolver, InputResult},
+  inputresolver::{InputResolverV2, InputResult},
   prelude::Result,
 };
 
@@ -19,7 +19,7 @@ pub struct Editor {
   pub terminal: Terminal<CrosstermBackend<Stdout>>,
   editor_mode: EditorMode,
 
-  input_resolver: InputResolver,
+  input_resolver: InputResolverV2,
 
   sender: UnboundedSender<Action>,
 }
@@ -37,7 +37,7 @@ impl Editor {
   }
 
   pub fn keyevent(&mut self, event: KeyEvent) -> Option<Vec<Action>> {
-    let result = self.input_resolver.input(&self.editor_mode, event).unwrap_or_default();
+    let result = self.input_resolver.input(event).unwrap_or_default();
     let mut stuff = Vec::new();
     for item in result {
       let action = match item {
@@ -48,27 +48,27 @@ impl Editor {
           None
         }
         InputResult::CausedAction(action) => Some(action),
-        InputResult::CursorIntent(test) => {
-          match test {
-            CursorMovement::Down => {
-              todo!();
-              //self.cursor.move_down();
-            }
-            CursorMovement::Up => {
-              todo!();
-              //self.cursor.move_up();
-            }
-            CursorMovement::Left => {
-              todo!();
-              //self.cursor.move_left();
-            }
-            CursorMovement::Right => {
-              todo!();
-              //self.cursor.move_right();
-            }
-          }
-          None
-        }
+        //InputResult::CursorIntent(test) => {
+        //  match test {
+        //    CursorMovement::Down => {
+        //      todo!();
+        //      //self.cursor.move_down();
+        //    }
+        //    CursorMovement::Up => {
+        //      todo!();
+        //      //self.cursor.move_up();
+        //    }
+        //    CursorMovement::Left => {
+        //      todo!();
+        //      //self.cursor.move_left();
+        //    }
+        //    CursorMovement::Right => {
+        //      todo!();
+        //      //self.cursor.move_right();
+        //    }
+        //  }
+        //  None
+        //}
       };
 
       if let Some(existing_action) = action {
@@ -95,7 +95,7 @@ impl Editor {
       frames,
       editor_mode: EditorMode::default(),
       terminal,
-      input_resolver: InputResolver::default(),
+      input_resolver: InputResolverV2::new(),
       sender,
     }
   }

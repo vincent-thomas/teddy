@@ -6,7 +6,7 @@ use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use super::inputresolverv2::InputResult;
 use crate::{action::Action, editor::EditorMode};
 
-#[derive(Default, PartialEq)]
+#[derive(Default, PartialEq, Debug)]
 pub enum InputMode {
   #[default]
   Normal,
@@ -22,7 +22,7 @@ struct InputState {
 pub struct InputManager {
   input_state: InputState,
 
-  master_buffer: Vec<KeyEvent>,
+  pub master_buffer: Vec<KeyEvent>,
   latest_index: i64,
 }
 
@@ -109,6 +109,7 @@ impl InputManager {
   }
 
   pub fn input(&mut self, input: KeyEvent) -> Option<Vec<InputResult>> {
+    dbg!(self.editor_mode(), &input);
     match self.editor_mode() {
       InputMode::Normal => self.simple_keybindings_normal(input),
       InputMode::Insert => self.simple_keybindings_insert(input),

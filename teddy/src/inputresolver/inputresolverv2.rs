@@ -2,7 +2,7 @@ use std::{collections::HashMap, ops::Range};
 
 use super::{
   input_manager::{InputManager, InputMode},
-  utils::{self, KeyEventExt},
+  utils::{self, KeyEventExt as _},
 };
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
@@ -67,7 +67,8 @@ impl InputResolverV2 {
       }
       MacroStoreTrackerV2::Recording { registry } if key.initiated_recording() => {
         let _macro = self.macro_stores.get_mut(&registry.unwrap());
-        _macro.unwrap().1 = Some(self.input_manager.index() - 1);
+        _macro.unwrap().1 = Some(self.input_manager.index());
+
         self.macro_store_tracker = None;
         MacroCheckReturn::Ignore
       }
@@ -76,22 +77,18 @@ impl InputResolverV2 {
       MacroStoreTrackerV2::Replaying => {
         let macro_label = utils::validate_macro_label(key).expect("Invalid Macro Label");
         let _macro = self.macro_stores.get(&macro_label);
+        self.macro_store_tracker = None;
 
         let (start_index, end_index) = _macro.expect("Macro has not been finished recording");
         let end_index = end_index.expect("Macro has not been finished recording");
 
         let store_slice = self.input_manager.get_store_slice(*start_index..end_index).to_vec();
 
-        let mut nice = Vec::new();
-        for item in store_slice {
-          let result = self.input_manager.input(item.clone());
-
-          if let Some(thing) = result {
-            nice.extend(thing);
-          }
-        }
-
-        self.macro_store_tracker = None;
+        let mut nice: Vec<InputResult> = store_slice
+          .iter()
+          .filter_map(|v| self.input_manager.input(v.clone()))
+          .flatten()
+          .collect();
 
         if nice.is_empty() {
           MacroCheckReturn::Ignore
@@ -116,35 +113,24 @@ mod tests {
   use crate::editor::EditorMode;
 
   use super::*;
-
   #[test]
-  fn inputresolver() {
+  fn test_mode_switching_under_record() {
     let mut input_resolver = InputResolverV2::new();
 
-    let inputs: Vec<(EditorMode, KeyEvent)> = Vec::from_iter([
-      (EditorMode::Normal, KeyEvent::new(KeyCode::Char('q'), KeyModifiers::NONE)),
-      (EditorMode::Normal, KeyEvent::new(KeyCode::Char('a'), KeyModifiers::NONE)),
-      (EditorMode::Normal, KeyEvent::new(KeyCode::Char('i'), KeyModifiers::NONE)),
-      (EditorMode::Insert, KeyEvent::new(KeyCode::Char('t'), KeyModifiers::NONE)),
-      (EditorMode::Insert, KeyEvent::new(KeyCode::Char('e'), KeyModifiers::NONE)),
-      (EditorMode::Insert, KeyEvent::new(KeyCode::Char('s'), KeyModifiers::NONE)),
-      (EditorMode::Insert, KeyEvent::new(KeyCode::Char('t'), KeyModifiers::NONE)),
-      (EditorMode::Insert, KeyEvent::new(KeyCode::Char('i'), KeyModifiers::NONE)),
-      (EditorMode::Insert, KeyEvent::new(KeyCode::Char('n'), KeyModifiers::NONE)),
-      (EditorMode::Insert, KeyEvent::new(KeyCode::Char('g'), KeyModifiers::NONE)),
-      (EditorMode::Insert, KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE)),
-      (EditorMode::Normal, KeyEvent::new(KeyCode::Char('q'), KeyModifiers::NONE)),
-      // Done recording
-      // Replaying
-      (EditorMode::Normal, KeyEvent::new(KeyCode::Char('@'), KeyModifiers::NONE)),
-      (EditorMode::Normal, KeyEvent::new(KeyCode::Char('a'), KeyModifiers::NONE)),
-      // Replay
-      (EditorMode::Insert, KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE)),
+    let inputs: Vec<KeyEvent> = Vec::from_iter([
+      KeyEvent::new(KeyCode::Char('q'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('a'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('i'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('q'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('q'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('@'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('a'), KeyModifiers::NONE),
     ]);
 
     let mut outputs: Vec<Option<Vec<InputResult>>> = Vec::new();
 
-    for (editor_mode, keyevent) in inputs {
+    for keyevent in inputs {
       let result = input_resolver.input(keyevent);
 
       outputs.push(result);
@@ -153,7 +139,70 @@ mod tests {
     let test_case = [
       None,
       None,
-      //Some(Vec::from_iter([InputResult::CausedAction(Action::ChangeMode(EditorMode::Insert))])),
+      None,
+      Some(Vec::from_iter([InputResult::Insert(KeyEvent::new(
+        KeyCode::Char('q'),
+        KeyModifiers::NONE,
+      ))])),
+      None,
+      None,
+      None,
+      Some(Vec::from_iter([InputResult::Insert(KeyEvent::new(
+        KeyCode::Char('q'),
+        KeyModifiers::NONE,
+      ))])),
+    ];
+
+    if outputs.len() != test_case.len() {
+      panic!(
+        "Invalid index lengths {} {}\n{:#?}\n{:#?}",
+        outputs.len(),
+        test_case.len(),
+        outputs,
+        test_case
+      );
+    }
+
+    for index in 0..outputs.len() {
+      let left = outputs[index].clone();
+      let right = test_case[index].clone();
+      if left != right {
+        panic!("left: {:#?}\nright: {:#?}", left, right);
+      }
+    }
+  }
+
+  #[test]
+  fn inputresolver() {
+    let mut input_resolver = InputResolverV2::new();
+
+    let inputs: Vec<KeyEvent> = Vec::from_iter([
+      KeyEvent::new(KeyCode::Char('q'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('a'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('i'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('t'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('e'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('s'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('t'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('s'), KeyModifiers::CONTROL),
+      KeyEvent::new(KeyCode::Char('q'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('@'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('a'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE),
+    ]);
+
+    let mut outputs: Vec<Option<Vec<InputResult>>> = Vec::new();
+
+    for keyevent in inputs {
+      let result = input_resolver.input(keyevent);
+
+      outputs.push(result);
+    }
+
+    let test_case = [
+      None,
+      None,
       None,
       Some(Vec::from_iter([InputResult::Insert(KeyEvent::new(
         KeyCode::Char('t'),
@@ -171,34 +220,18 @@ mod tests {
         KeyCode::Char('t'),
         KeyModifiers::NONE,
       ))])),
-      Some(Vec::from_iter([InputResult::Insert(KeyEvent::new(
-        KeyCode::Char('i'),
-        KeyModifiers::NONE,
-      ))])),
-      Some(Vec::from_iter([InputResult::Insert(KeyEvent::new(
-        KeyCode::Char('n'),
-        KeyModifiers::NONE,
-      ))])),
-      Some(Vec::from_iter([InputResult::Insert(KeyEvent::new(
-        KeyCode::Char('g'),
-        KeyModifiers::NONE,
-      ))])),
       None,
-      //Some(Vec::from_iter([InputResult::CausedAction(Action::ChangeMode(EditorMode::Normal))])),
+      Some(Vec::from_iter([InputResult::CausedAction(Action::WriteActiveBuffer)])),
       None,
-      None, // Ska vara None för '@' men på grund av implementationen så märks den inte
+      None,
       Some(Vec::from_iter([
-        //InputResult::CausedAction(Action::ChangeMode(EditorMode::Insert)),
         InputResult::Insert(KeyEvent::new(KeyCode::Char('t'), KeyModifiers::NONE)),
         InputResult::Insert(KeyEvent::new(KeyCode::Char('e'), KeyModifiers::NONE)),
         InputResult::Insert(KeyEvent::new(KeyCode::Char('s'), KeyModifiers::NONE)),
         InputResult::Insert(KeyEvent::new(KeyCode::Char('t'), KeyModifiers::NONE)),
-        InputResult::Insert(KeyEvent::new(KeyCode::Char('i'), KeyModifiers::NONE)),
-        InputResult::Insert(KeyEvent::new(KeyCode::Char('n'), KeyModifiers::NONE)),
-        InputResult::Insert(KeyEvent::new(KeyCode::Char('g'), KeyModifiers::NONE)),
-        InputResult::CausedAction(Action::ChangeMode(EditorMode::Normal)),
+        InputResult::CausedAction(Action::WriteActiveBuffer),
       ])),
-      None, //Some(Vec::from_iter([InputResult::CausedAction(Action::ChangeMode(EditorMode::Normal))])),
+      None,
     ];
 
     if outputs.len() != test_case.len() {
@@ -214,8 +247,9 @@ mod tests {
     for index in 0..outputs.len() {
       let left = outputs[index].clone();
       let right = test_case[index].clone();
-
-      assert_eq!(left, right, "At Index: {}\n{:#?}", index, outputs);
+      if left != right {
+        panic!("left: {:#?}\nright: {:#?}", left, right);
+      }
     }
   }
 }
