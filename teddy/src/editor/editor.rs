@@ -19,7 +19,6 @@ pub struct Editor {
   pub terminal: Terminal<CrosstermBackend<Stdout>>,
   editor_mode: EditorMode,
 
-  cursor: Cursor,
   input_resolver: InputResolver,
 
   sender: UnboundedSender<Action>,
@@ -37,62 +36,65 @@ impl Editor {
     return Ok(());
   }
 
-  pub fn keyevent(&mut self, event: KeyEvent) -> Result<Option<Action>> {
-    if let Some(ok_result) = self.input_resolver.input(&self.editor_mode, event) {
-      for item in ok_result {
-        match item {
-          InputResult::Insert(test) => {
-            tracing::trace!("insert: {:?}", test);
+  pub fn keyevent(&mut self, event: KeyEvent) -> Option<Vec<Action>> {
+    let result = self.input_resolver.input(&self.editor_mode, event).unwrap_or_default();
+    let mut stuff = Vec::new();
+    for item in result {
+      let action = match item {
+        InputResult::Insert(test) => {
+          if let Some(active_frame) = self.frames.active_frame() {
+            active_frame.insert(test);
           }
-          InputResult::CausedAction(test) => {
-            tracing::trace!("caused action: {:?}", test);
-            self.sender.send(test);
-          }
-          InputResult::CursorIntent(test) => {
-            tracing::trace!("caused cursor intent: {:?}", test);
-
-            match test {
-              CursorMovement::Down => {
-                todo!();
-                //self.cursor.move_down();
-              }
-              CursorMovement::Up => {
-                todo!();
-                //self.cursor.move_up();
-              }
-              CursorMovement::Left => {
-                todo!();
-                //self.cursor.move_left();
-              }
-              CursorMovement::Right => {
-                todo!();
-                //self.cursor.move_right();
-              }
+          None
+        }
+        InputResult::CausedAction(action) => Some(action),
+        InputResult::CursorIntent(test) => {
+          match test {
+            CursorMovement::Down => {
+              todo!();
+              //self.cursor.move_down();
+            }
+            CursorMovement::Up => {
+              todo!();
+              //self.cursor.move_up();
+            }
+            CursorMovement::Left => {
+              todo!();
+              //self.cursor.move_left();
+            }
+            CursorMovement::Right => {
+              todo!();
+              //self.cursor.move_right();
             }
           }
+          None
         }
-      }
-    };
+      };
 
-    Ok(None)
+      if let Some(existing_action) = action {
+        stuff.push(existing_action)
+      }
+    }
+
+    if !stuff.is_empty() {
+      Some(stuff)
+    } else {
+      None
+    }
   }
 }
 impl Editor {
   pub fn new(sender: UnboundedSender<Action>, backend: CrosstermBackend<Stdout>) -> Self {
-    let mut frames = FrameManager::default();
+    let mut frames = FrameManager::new(sender.clone());
     tracing::info!("Initiating Editor");
-
-    frames.register_action_handler(sender.clone()).unwrap();
 
     let terminal = Terminal::new(backend).unwrap();
     let terminal_rect = terminal.size().unwrap();
-    frames.set_area(terminal_rect);
 
     Self {
       frames,
       editor_mode: EditorMode::default(),
       terminal,
-      cursor: Cursor::with_position(0, 0),
       input_resolver: InputResolver::default(),
       sender,
     }
@@ -101,7 +103,8 @@ impl Editor {
   pub fn replace_active_buffer(&mut self, buffer: Box<dyn Component>) -> Result<()> {
     let manager = &mut self.frames;
     if let Some(active) = manager.active_frame() {
-      manager.fill_window(*active, buffer).unwrap();
+      unimplemented!()
+      //manager.fill_window(*active, buffer).unwrap();
     }
     Ok(())
   }
@@ -113,21 +116,24 @@ impl Editor {
   }
   pub fn open_buffer(&mut self, buffer: Box<dyn Component>) -> Result<()> {
     tracing::info!("Opening buffer");
-    let index = self.frames.add_window().unwrap();
-
-    self.frames.fill_window(index, buffer);
+    unimplemented!();
+    //let index = self.frames.add_window().unwrap();
+    //
+    //self.frames.fill_window(index, buffer);
 
     Ok(())
   }
 
   pub fn remove_buffer(&mut self, index: u16) -> Result<()> {
-    self.frames.remove_window(index);
+    unimplemented!();
+    //self.frames.remove_window(index);
     Ok(())
   }
 
   pub fn remove_active_buffer(&mut self) -> Result<()> {
     if let Some(active) = self.frames.active_frame() {
-      self.frames.remove_window(*active);
+      unimplemented!()
+      //self.frames.remove_window(*active);
     }
     Ok(())
   }
@@ -136,6 +142,6 @@ impl Editor {
 // Rendering...
 impl Editor {
   pub fn set_area(&mut self, area: Rect) {
-    self.frames.set_area(area);
+    //self.frames.set_area(area);
   }
 }

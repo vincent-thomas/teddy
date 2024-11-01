@@ -94,7 +94,8 @@ impl FilePicker {
     let boxpath: Box<Path> = path.into();
 
     let file = FileBuffer::with_path(boxpath);
-    Some(Action::ReplaceActiveBuffer(Box::new(file)))
+    None
+    //Some(Action::ReplaceActiveBuffer(Box::new(file)))
   }
 
   fn open_parent(&mut self) {

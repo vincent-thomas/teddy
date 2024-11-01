@@ -2,6 +2,7 @@ use crate::{components::Component, editor::EditorMode};
 use std::{fmt::Debug, path::PathBuf};
 
 /// Every single action a component can take outside the editor.
+#[derive(PartialEq, Clone)]
 pub enum Action {
   Quit,
 
@@ -11,9 +12,8 @@ pub enum Action {
   //ShowCursor,
   //HideCursor,
   //MoveCursor(usize, usize),
-  OpenBuffer(Box<dyn Component>),
-  ReplaceActiveBuffer(Box<dyn Component>),
-
+  //OpenBuffer(Box<dyn Component>),
+  //ReplaceActiveBuffer(Box<dyn Component>),
   CloseActiveBuffer,
   WriteActiveBuffer,
 
@@ -23,7 +23,7 @@ pub enum Action {
   ChangeMode(EditorMode),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum NotificationLevel {
   Info,
   Error,
@@ -31,7 +31,7 @@ pub enum NotificationLevel {
   None,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Notification {
   level: NotificationLevel,
   message: String,
@@ -43,13 +43,14 @@ impl Notification {
   }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum DiagnosticLevel {
   Info,
   Error,
   Warn,
 }
 
+#[derive(PartialEq, Clone)]
 pub struct Diagnostic {
   level: DiagnosticLevel,
   message: String,
@@ -64,9 +65,9 @@ impl Debug for Action {
       Action::Quit => write!(f, "Action::Quit"),
       Action::Resize(x, y) => write!(f, "Action::Resize({}, {})", x, y),
       Action::AttachNotification(_) => write!(f, "Action::WriteErrorMessage"),
-      Action::ReplaceActiveBuffer(_) => write!(f, "Action::ReplaceActiveBuffer"),
+      //Action::ReplaceActiveBuffer(_) => write!(f, "Action::ReplaceActiveBuffer"),
       Action::ChangeMode(mode) => write!(f, "Action::ChangeMode({:?})", mode),
-      Action::OpenBuffer(_) => write!(f, "Action::OpenBuffer"),
+      //Action::OpenBuffer(_) => write!(f, "Action::OpenBuffer"),
       Action::CloseActiveBuffer => write!(f, "Action::CloseActiveBuffer"),
       Action::WriteActiveBuffer => write!(f, "Action::WriteActiveBuffer"),
       Action::WriteDiagnostic(_) => write!(f, "Action::WriteDiagnostic"),

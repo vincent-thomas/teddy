@@ -15,7 +15,7 @@ pub enum Event {
   Render,
   Crossterm(CrosstermEvent),
 
-  //LSPError, // TODO,
+  LSPNotification(String), // TODO,
   EventStreamError(io::Error),
 }
 

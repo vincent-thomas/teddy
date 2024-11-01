@@ -6,6 +6,7 @@ edition = "2021"
 
 [dependencies]
 teddy_cursor = { path = "../teddy_cursor" }
+teddy_core = { path = "../teddy_core" }
 teddy_events = { path = "../teddy_events" }
 
 tokio = {workspace = true}

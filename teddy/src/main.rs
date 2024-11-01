@@ -5,7 +5,8 @@ mod tui;
 
 use clier_parser::Argv;
 use std::error::Error;
-use teddy::Application;
+use teddy::Teddy;
+use teddy_core::Application;
 use teddy_events::Events;
 
 #[tokio::main]
@@ -14,7 +15,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
   logging::init()?;
 
   let terminal = tui::init()?;
-  let mut app = Application::new(terminal);
+  let mut app = Teddy::new(terminal);
 
   let args = Argv::parse();
   app.init(args)?;

@@ -1,4 +1,4 @@
-#[derive(Default, Debug, PartialEq)]
+#[derive(Default, Debug, PartialEq, Clone)]
 pub enum EditorMode {
   #[default]
   Normal,

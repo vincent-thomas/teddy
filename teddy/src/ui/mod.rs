@@ -13,8 +13,8 @@ pub fn ui(editor: &mut Editor) -> Result<(), Box<dyn std::error::Error>> {
     let layout =
       Layout::vertical([Constraint::Fill(1), Constraint::Length(1), Constraint::Length(1)])
         .split(area);
-    editor.frames.set_area(layout[0]);
-    editor.frames.draw(frame, layout[0]).unwrap();
+    //editor.frames.set_area(layout[0]);
+    //editor.frames.draw(frame, layout[0]).unwrap();
 
     let chunks = Layout::default()
       .direction(Direction::Horizontal)
