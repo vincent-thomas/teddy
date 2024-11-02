@@ -91,14 +91,14 @@ impl Teddy {
 
       tracing::info!("Opening path: {:?}", &path);
 
-      let boxed_buffer: Box<dyn Component> = match path_buf.is_dir() {
-        true => Box::new(FilePicker::new()),
+      let _boxed_buffer: Box<dyn Component> = match path_buf.is_dir() {
+        true => Box::new(FilePicker::default()),
         false => Box::new(FileBuffer::with_path(path_buf)),
       };
 
       //self.action_sender.send(Action::OpenBuffer(boxed_buffer))?;
     } else {
-      let placeholder = PlaceholderBuffer::default();
+      let _placeholder = PlaceholderBuffer::default();
       //self.action_sender.send(Action::OpenBuffer(Box::new(placeholder)))?;
     }
     Ok(())

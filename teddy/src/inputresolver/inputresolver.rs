@@ -1,286 +1,127 @@
-use crate::{
-  action::{Action, Notification, NotificationLevel},
-  editor::EditorMode,
-};
-use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use std::collections::HashMap;
 
-#[derive(Debug)]
-pub struct InputResolver {
-  master_buffer: Vec<KeyEvent>,
-  macro_stores: HashMap<char, (usize, Option<usize>)>,
+use super::{
+  input_manager::{InputManager, InputMode},
+  utils::{self, KeyEventExt as _},
+};
+use crossterm::event::{KeyCode, KeyEvent};
 
-  latest_index: usize,
+use crate::action::Action;
 
-  macro_store_tracker: Option<MacroStoreTracker>,
+enum MacroCheckReturn {
+  Continue,
+  Ignore,
+  Some(Vec<InputResult>),
 }
-
-#[derive(Debug, PartialEq)]
-struct MacroStoreTracker {
-  state: MacroStoreState,
-  selection_type: MacroSelectionType,
-}
-
-#[derive(Debug, PartialEq, Copy, Clone)]
-enum MacroSelectionType {
-  Recording,
-  Replaying,
-}
-
-#[derive(Debug, PartialEq)]
-enum MacroStoreState {
-  ChoosingRegistry,
-  ChosenRegistry(char),
-}
-
-impl Default for InputResolver {
-  fn default() -> Self {
-    let default_keyevent = KeyEvent::new(KeyCode::Esc, KeyModifiers::empty());
-    tracing::trace!("Initializing InputResolver");
-    Self {
-      master_buffer: vec![default_keyevent],
-      latest_index: 0, // tror
-      macro_stores: HashMap::default(),
-      macro_store_tracker: None,
-    }
-  }
-}
-
 #[derive(Debug, PartialEq, Clone)]
 pub enum InputResult {
   Insert(KeyEvent),
-  CursorIntent(CursorMovement),
   CausedAction(Action),
 }
-
-#[derive(Debug, PartialEq, Clone, Copy)]
-pub enum CursorMovement {
-  Up,
-  Down,
-  Left,
-  Right,
+enum MacroStoreTrackerV2 {
+  Recording { registry: Option<char> },
+  Replaying,
 }
 
-enum MacroOutput {
-  Continue,
-  IgnoreKey,
-  Some(Vec<InputResult>),
+#[derive(Default)]
+pub struct InputResolverV2 {
+  macro_stores: HashMap<char, (usize, Option<usize>)>,
+  macro_store_tracker: Option<MacroStoreTrackerV2>,
+
+  input_manager: InputManager,
 }
 
-impl InputResolver {
-  pub fn macro_test(&mut self, editor: &EditorMode, input: KeyEvent) -> MacroOutput {
-    let Some(ref macro_store) = self.macro_store_tracker else {
-      if editor == &EditorMode::Normal
-        && (input.code == KeyCode::Char('q') || input.code == KeyCode::Char('@'))
-      {
-        let selection_type = match input.code {
-          KeyCode::Char('q') => MacroSelectionType::Recording,
-          KeyCode::Char('@') => MacroSelectionType::Replaying,
-          _ => unreachable!(),
-        };
-
-        let store = MacroStoreTracker { state: MacroStoreState::ChoosingRegistry, selection_type };
-        self.macro_store_tracker = Some(store);
-        return MacroOutput::IgnoreKey;
-      }
-      return MacroOutput::Continue;
+impl InputResolverV2 {
+  fn check_macro_insertion(&mut self, key: KeyEvent) -> MacroCheckReturn {
+    let mode = self.input_manager.editor_mode();
+    if *mode != InputMode::Normal {
+      return MacroCheckReturn::Continue;
+    }
+    let Some(macro_state) = self.macro_store_tracker.as_mut() else {
+      return match key.code {
+        KeyCode::Char('q') => {
+          self.macro_store_tracker = Some(MacroStoreTrackerV2::Recording { registry: None });
+          MacroCheckReturn::Ignore
+        }
+        KeyCode::Char('@') => {
+          self.macro_store_tracker = Some(MacroStoreTrackerV2::Replaying);
+          MacroCheckReturn::Ignore
+        }
+        _ => MacroCheckReturn::Continue,
+      };
     };
 
-    let output = match macro_store.state {
-      MacroStoreState::ChoosingRegistry => {
-        let KeyCode::Char(registry) = input.code else {
-          let notification = Notification::new(
-            NotificationLevel::Error,
-            format!("'{:?}' can't be used as a macro label", input.code),
-          );
-          let action = Action::AttachNotification(notification);
-          return MacroOutput::Some(Vec::from_iter([InputResult::CausedAction(action)]));
-        };
+    match macro_state {
+      MacroStoreTrackerV2::Recording { registry } if registry.is_none() => {
+        let macro_label = utils::validate_macro_label(key).expect("Invalid Macro Label");
+        *registry = Some(macro_label);
+        self.macro_stores.insert(macro_label, (self.input_manager.index() + 1, None));
+        MacroCheckReturn::Ignore
+      }
+      MacroStoreTrackerV2::Recording { registry } if key.initiated_recording() => {
+        let _macro = self.macro_stores.get_mut(&registry.unwrap());
+        _macro.unwrap().1 = Some(self.input_manager.index());
 
-        match macro_store.selection_type {
-          MacroSelectionType::Recording => {
-            let starting_index = self.latest_index + 1;
-            self.macro_stores.insert(registry, (starting_index, None));
-            self.macro_store_tracker.as_mut().unwrap().state =
-              MacroStoreState::ChosenRegistry(registry);
+        self.macro_store_tracker = None;
+        MacroCheckReturn::Ignore
+      }
+      // Här kommer den ju att aktivt recorda genom att vänta på när den är klar.
+      MacroStoreTrackerV2::Recording { registry: _ } => MacroCheckReturn::Continue,
+      MacroStoreTrackerV2::Replaying => {
+        let macro_label = utils::validate_macro_label(key).expect("Invalid Macro Label");
+        let _macro = self.macro_stores.get(&macro_label);
+        self.macro_store_tracker = None;
 
-            return MacroOutput::IgnoreKey;
-          }
-          MacroSelectionType::Replaying => {
-            let mut macro_buffer = self.macro_stores.get_mut(&registry).unwrap();
-            let start_index = macro_buffer.0;
-            let end_index = macro_buffer.1.unwrap();
+        let (start_index, end_index) = _macro.expect("Macro has not been finished recording");
+        let end_index = end_index.expect("Macro has not been finished recording");
 
-            let buffer = self.master_buffer[start_index..end_index].to_vec();
-            let mut results = Vec::new();
+        let store_slice = self.input_manager.get_store_slice(*start_index..end_index).to_vec();
 
-            self.macro_store_tracker = None;
+        let nice: Vec<InputResult> =
+          store_slice.iter().filter_map(|v| self.input_manager.input(*v)).flatten().collect();
 
-            let mut mode = editor.clone();
-            for index in start_index..(end_index + 1) {
-              let buffer_replay_key = self.master_buffer[index];
-
-              let result = self.inner_input(&mode, buffer_replay_key);
-
-              if let Some(exist) = result {
-                for item in exist.clone() {
-                  match item {
-                    InputResult::CausedAction(action) => match action {
-                      Action::ChangeMode(new_mode) => mode = new_mode,
-                      _ => {}
-                    },
-                    _ => {}
-                  }
-                }
-                results.extend(exist);
-              };
-            }
-
-            if results.is_empty() {
-              MacroOutput::IgnoreKey
-            } else {
-              MacroOutput::Some(results)
-            }
-          }
+        if nice.is_empty() {
+          MacroCheckReturn::Ignore
+        } else {
+          MacroCheckReturn::Some(nice)
         }
       }
-      MacroStoreState::ChosenRegistry(registry) => match macro_store.selection_type {
-        MacroSelectionType::Recording => {
-          if let KeyCode::Char(char_pressed) = input.code.clone() {
-            if char_pressed == 'q' && editor == &EditorMode::Normal {
-              self.macro_stores.get_mut(&registry).unwrap().1 = Some(self.latest_index - 1);
-              self.macro_store_tracker = None;
-              return MacroOutput::IgnoreKey;
-            }
-          }
-          return MacroOutput::Continue;
-        }
-        MacroSelectionType::Replaying => {
-          unreachable!()
-        }
-      },
-    };
-    output
-  }
-
-  pub fn push_keyevent_buffer(&mut self, input: KeyEvent) {
-    tracing::trace!("adding: {:?}", &input.code);
-    self.master_buffer.push(input);
-    self.latest_index += 1;
-  }
-
-  fn simple_keybindings_normal(&mut self, input: KeyEvent) -> Option<Vec<InputResult>> {
-    match (input.modifiers, input.code) {
-      (KeyModifiers::CONTROL, KeyCode::Char('c')) => {
-        Some(vec![InputResult::CausedAction(Action::Quit)])
-      }
-      (KeyModifiers::CONTROL, KeyCode::Char('s')) => {
-        Some(vec![InputResult::CausedAction(Action::WriteActiveBuffer)])
-      }
-      (KeyModifiers::NONE, KeyCode::Char('i')) => {
-        Some(vec![InputResult::CausedAction(Action::ChangeMode(EditorMode::Insert))])
-      }
-      (KeyModifiers::NONE, KeyCode::Char(':')) => {
-        Some(vec![InputResult::CausedAction(Action::ChangeMode(EditorMode::Command))])
-      }
-      (KeyModifiers::NONE, KeyCode::Char('v')) => {
-        Some(vec![InputResult::CausedAction(Action::ChangeMode(EditorMode::Visual))])
-      }
-
-      (KeyModifiers::NONE, KeyCode::Char('l')) => {
-        Some(vec![InputResult::CursorIntent(CursorMovement::Right)])
-      }
-      (KeyModifiers::NONE, KeyCode::Char('k')) => {
-        Some(vec![InputResult::CursorIntent(CursorMovement::Up)])
-      }
-      (KeyModifiers::NONE, KeyCode::Char('j')) => {
-        Some(vec![InputResult::CursorIntent(CursorMovement::Down)])
-      }
-      (KeyModifiers::NONE, KeyCode::Char('h')) => {
-        Some(vec![InputResult::CursorIntent(CursorMovement::Left)])
-      }
-      _ => None,
     }
   }
 
-  fn simple_keybindings_insert(&mut self, input: KeyEvent) -> Option<Vec<InputResult>> {
-    match input.code {
-      KeyCode::Esc => Some(vec![InputResult::CausedAction(Action::ChangeMode(EditorMode::Normal))]),
-      _ => Some(vec![InputResult::Insert(input)]),
-    }
-  }
-
-  fn simple_keybindings_command(&mut self, input: KeyEvent) -> Option<Vec<InputResult>> {
-    match input.code {
-      KeyCode::Esc => Some(vec![InputResult::CausedAction(Action::ChangeMode(EditorMode::Normal))]),
-      _ => Some(vec![InputResult::Insert(input)]),
-    }
-  }
-
-  fn simple_keybindings_visual(&mut self, input: KeyEvent) -> Option<Vec<InputResult>> {
-    match input.code {
-      KeyCode::Esc => Some(vec![InputResult::CausedAction(Action::ChangeMode(EditorMode::Normal))]),
-      _ => None,
-    }
-  }
-
-  fn inner_input(&mut self, mode: &EditorMode, input: KeyEvent) -> Option<Vec<InputResult>> {
-    match mode {
-      EditorMode::Normal => self.simple_keybindings_normal(input),
-      EditorMode::Insert => self.simple_keybindings_insert(input),
-      EditorMode::Command => self.simple_keybindings_command(input),
-      EditorMode::Visual => self.simple_keybindings_visual(input),
-    }
-  }
-  pub fn input(&mut self, mode: &EditorMode, input: KeyEvent) -> Option<Vec<InputResult>> {
-    self.push_keyevent_buffer(input.clone());
-    match self.macro_test(mode, input.clone()) {
-      MacroOutput::Continue => self.inner_input(mode, input),
-      MacroOutput::Some(v) => Some(v),
-      MacroOutput::IgnoreKey => None,
+  pub fn input(&mut self, key: KeyEvent) -> Option<Vec<InputResult>> {
+    self.input_manager.push_key(key);
+    match self.check_macro_insertion(key) {
+      MacroCheckReturn::Continue => self.input_manager.input(key),
+      MacroCheckReturn::Some(v) => Some(v),
+      MacroCheckReturn::Ignore => None,
     }
   }
 }
-
-enum InnerInputConfig {
-  None,
-  MacroPassthrough,
-  LookbackMasterReference(usize),
-}
-
 #[cfg(test)]
 mod tests {
+  use crossterm::event::KeyModifiers;
+
   use super::*;
-
   #[test]
-  fn inputresolver() {
-    let mut input_resolver = InputResolver::default();
+  fn test_mode_switching_under_record() {
+    let mut input_resolver = InputResolverV2::default();
 
-    let inputs: Vec<(EditorMode, KeyEvent)> = Vec::from_iter([
-      (EditorMode::Normal, KeyEvent::new(KeyCode::Char('q'), KeyModifiers::NONE)),
-      (EditorMode::Normal, KeyEvent::new(KeyCode::Char('a'), KeyModifiers::NONE)),
-      (EditorMode::Normal, KeyEvent::new(KeyCode::Char('i'), KeyModifiers::NONE)),
-      (EditorMode::Insert, KeyEvent::new(KeyCode::Char('t'), KeyModifiers::NONE)),
-      (EditorMode::Insert, KeyEvent::new(KeyCode::Char('e'), KeyModifiers::NONE)),
-      (EditorMode::Insert, KeyEvent::new(KeyCode::Char('s'), KeyModifiers::NONE)),
-      (EditorMode::Insert, KeyEvent::new(KeyCode::Char('t'), KeyModifiers::NONE)),
-      (EditorMode::Insert, KeyEvent::new(KeyCode::Char('i'), KeyModifiers::NONE)),
-      (EditorMode::Insert, KeyEvent::new(KeyCode::Char('n'), KeyModifiers::NONE)),
-      (EditorMode::Insert, KeyEvent::new(KeyCode::Char('g'), KeyModifiers::NONE)),
-      (EditorMode::Insert, KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE)),
-      (EditorMode::Normal, KeyEvent::new(KeyCode::Char('q'), KeyModifiers::NONE)),
-      // Done recording
-      // Replaying
-      (EditorMode::Normal, KeyEvent::new(KeyCode::Char('@'), KeyModifiers::NONE)),
-      (EditorMode::Normal, KeyEvent::new(KeyCode::Char('a'), KeyModifiers::NONE)),
-      // Replay
-      (EditorMode::Insert, KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE)),
+    let inputs: Vec<KeyEvent> = Vec::from_iter([
+      KeyEvent::new(KeyCode::Char('q'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('a'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('i'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('q'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('q'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('@'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('a'), KeyModifiers::NONE),
     ]);
 
     let mut outputs: Vec<Option<Vec<InputResult>>> = Vec::new();
 
-    for (editor_mode, keyevent) in inputs {
-      let result = input_resolver.input(&editor_mode, keyevent);
+    for keyevent in inputs {
+      let result = input_resolver.input(keyevent);
 
       outputs.push(result);
     }
@@ -288,7 +129,71 @@ mod tests {
     let test_case = [
       None,
       None,
-      Some(Vec::from_iter([InputResult::CausedAction(Action::ChangeMode(EditorMode::Insert))])),
+      None,
+      Some(Vec::from_iter([InputResult::Insert(KeyEvent::new(
+        KeyCode::Char('q'),
+        KeyModifiers::NONE,
+      ))])),
+      None,
+      None,
+      None,
+      Some(Vec::from_iter([InputResult::Insert(KeyEvent::new(
+        KeyCode::Char('q'),
+        KeyModifiers::NONE,
+      ))])),
+    ];
+
+    if outputs.len() != test_case.len() {
+      panic!(
+        "Invalid index lengths {} {}\n{:#?}\n{:#?}",
+        outputs.len(),
+        test_case.len(),
+        outputs,
+        test_case
+      );
+    }
+
+    for index in 0..outputs.len() {
+      let left = outputs[index].clone();
+      let right = test_case[index].clone();
+      if left != right {
+        panic!("left: {:#?}\nright: {:#?}", left, right);
+      }
+    }
+  }
+
+  #[test]
+  fn inputresolver() {
+    let mut input_resolver = InputResolverV2::default();
+
+    let inputs: Vec<KeyEvent> = Vec::from_iter([
+      KeyEvent::new(KeyCode::Char('q'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('a'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('i'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('t'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('e'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('s'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('t'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('s'), KeyModifiers::CONTROL),
+      KeyEvent::new(KeyCode::Char('q'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('@'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Char('a'), KeyModifiers::NONE),
+      KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE),
+    ]);
+
+    let mut outputs: Vec<Option<Vec<InputResult>>> = Vec::new();
+
+    for keyevent in inputs {
+      let result = input_resolver.input(keyevent);
+
+      outputs.push(result);
+    }
+
+    let test_case = [
+      None,
+      None,
+      None,
       Some(Vec::from_iter([InputResult::Insert(KeyEvent::new(
         KeyCode::Char('t'),
         KeyModifiers::NONE,
@@ -305,33 +210,18 @@ mod tests {
         KeyCode::Char('t'),
         KeyModifiers::NONE,
       ))])),
-      Some(Vec::from_iter([InputResult::Insert(KeyEvent::new(
-        KeyCode::Char('i'),
-        KeyModifiers::NONE,
-      ))])),
-      Some(Vec::from_iter([InputResult::Insert(KeyEvent::new(
-        KeyCode::Char('n'),
-        KeyModifiers::NONE,
-      ))])),
-      Some(Vec::from_iter([InputResult::Insert(KeyEvent::new(
-        KeyCode::Char('g'),
-        KeyModifiers::NONE,
-      ))])),
-      Some(Vec::from_iter([InputResult::CausedAction(Action::ChangeMode(EditorMode::Normal))])),
       None,
-      None, // Ska vara None för '@' men på grund av implementationen så märks den inte
+      Some(Vec::from_iter([InputResult::CausedAction(Action::WriteActiveBuffer)])),
+      None,
+      None,
       Some(Vec::from_iter([
-        InputResult::CausedAction(Action::ChangeMode(EditorMode::Insert)),
         InputResult::Insert(KeyEvent::new(KeyCode::Char('t'), KeyModifiers::NONE)),
         InputResult::Insert(KeyEvent::new(KeyCode::Char('e'), KeyModifiers::NONE)),
         InputResult::Insert(KeyEvent::new(KeyCode::Char('s'), KeyModifiers::NONE)),
         InputResult::Insert(KeyEvent::new(KeyCode::Char('t'), KeyModifiers::NONE)),
-        InputResult::Insert(KeyEvent::new(KeyCode::Char('i'), KeyModifiers::NONE)),
-        InputResult::Insert(KeyEvent::new(KeyCode::Char('n'), KeyModifiers::NONE)),
-        InputResult::Insert(KeyEvent::new(KeyCode::Char('g'), KeyModifiers::NONE)),
-        InputResult::CausedAction(Action::ChangeMode(EditorMode::Normal)),
+        InputResult::CausedAction(Action::WriteActiveBuffer),
       ])),
-      Some(Vec::from_iter([InputResult::CausedAction(Action::ChangeMode(EditorMode::Normal))])),
+      None,
     ];
 
     if outputs.len() != test_case.len() {
@@ -347,8 +237,9 @@ mod tests {
     for index in 0..outputs.len() {
       let left = outputs[index].clone();
       let right = test_case[index].clone();
-
-      assert_eq!(left, right, "At Index: {}", index);
+      if left != right {
+        panic!("left: {:#?}\nright: {:#?}", left, right);
+      }
     }
   }
 }

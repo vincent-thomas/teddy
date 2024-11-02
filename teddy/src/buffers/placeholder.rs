@@ -20,7 +20,7 @@ impl Buffer for PlaceholderBuffer {
 }
 
 impl Component for PlaceholderBuffer {
-  fn draw(&mut self, frame: &mut ratatui::Frame, area: ratatui::prelude::Rect) -> Result<()> {
+  fn draw(& self, frame: &mut ratatui::Frame, area: ratatui::prelude::Rect) -> Result<()> {
     frame.render_widget(Text::from(self.0.to_string()), area);
     Ok(())
   }

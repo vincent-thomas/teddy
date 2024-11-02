@@ -1,15 +1,10 @@
 use std::collections::HashMap;
 
-use crossterm::event::KeyEvent;
 use tokio::sync::mpsc::UnboundedSender;
 
 use crate::action::Action;
-use crate::buffers::Buffer;
-use crate::components::Component;
 
 use super::Frame;
-
-use crate::prelude::Result;
 
 #[derive(Debug)]
 pub struct FrameManager {

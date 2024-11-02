@@ -110,5 +110,13 @@ pub trait Component: Buffer {
   /// # Returns
   ///
   /// * `Result<()>` - An Ok result or an error.
-  fn draw(&mut self, frame: &mut Frame, area: Rect) -> Result<()>;
+  fn draw(&self, frame: &mut Frame, area: Rect) -> Result<()> {
+    let test = self.get_buff().to_string();
+
+    
+
+    // test.self.draw(frame, area).unwrap();
+
+    Ok(())
+  }
 }
