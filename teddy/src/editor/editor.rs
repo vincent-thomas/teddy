@@ -1,8 +1,7 @@
 use std::io::Stdout;
 
 use crossterm::event::KeyEvent;
-use ratatui::{layout::Rect, prelude::*, Terminal};
-use teddy_cursor::Cursor;
+use ratatui::{prelude::*, Terminal};
 use tokio::sync::mpsc::UnboundedSender;
 
 use crate::{
@@ -20,8 +19,7 @@ pub struct Editor {
   editor_mode: EditorMode,
 
   input_resolver: InputResolverV2,
-
-  sender: UnboundedSender<Action>,
+  //sender: UnboundedSender<Action>,
 }
 
 // Event Loop
@@ -33,7 +31,7 @@ impl Editor {
       self.editor_mode = mode;
     }
 
-    return Ok(());
+    Ok(())
   }
 
   pub fn keyevent(&mut self, event: KeyEvent) -> Option<Vec<Action>> {
@@ -43,7 +41,7 @@ impl Editor {
       let action = match item {
         InputResult::Insert(test) => {
           if let Some(active_frame) = self.frames.active_frame() {
-            active_frame.insert(test);
+            active_frame.insert(test).unwrap();
           }
           None
         }
@@ -85,24 +83,23 @@ impl Editor {
 }
 impl Editor {
   pub fn new(sender: UnboundedSender<Action>, backend: CrosstermBackend<Stdout>) -> Self {
-    let mut frames = FrameManager::new(sender.clone());
     tracing::info!("Initiating Editor");
 
+    let frames = FrameManager::new(sender.clone());
     let terminal = Terminal::new(backend).unwrap();
-    let terminal_rect = terminal.size().unwrap();
 
     Self {
       frames,
       editor_mode: EditorMode::default(),
       terminal,
-      input_resolver: InputResolverV2::new(),
-      sender,
+      input_resolver: InputResolverV2::default(),
+      //sender,
     }
   }
 
-  pub fn replace_active_buffer(&mut self, buffer: Box<dyn Component>) -> Result<()> {
+  pub fn replace_active_buffer(&mut self, _buffer: Box<dyn Component>) -> Result<()> {
     let manager = &mut self.frames;
-    if let Some(active) = manager.active_frame() {
+    if let Some(_active) = manager.active_frame() {
       unimplemented!()
       //manager.fill_window(*active, buffer).unwrap();
     }
@@ -112,36 +109,29 @@ impl Editor {
 // Buffer Modification
 impl Editor {
   pub fn write_active_buffer(&mut self) -> Result<()> {
-    return Ok(());
+    unimplemented!();
   }
-  pub fn open_buffer(&mut self, buffer: Box<dyn Component>) -> Result<()> {
+  pub fn open_buffer(&mut self, _buffer: Box<dyn Component>) -> Result<()> {
     tracing::info!("Opening buffer");
     unimplemented!();
     //let index = self.frames.add_window().unwrap();
     //
     //self.frames.fill_window(index, buffer);
 
-    Ok(())
+    //Ok(())
   }
 
-  pub fn remove_buffer(&mut self, index: u16) -> Result<()> {
+  pub fn remove_buffer(&mut self, _index: u16) -> Result<()> {
     unimplemented!();
     //self.frames.remove_window(index);
-    Ok(())
+    //Ok(())
   }
 
   pub fn remove_active_buffer(&mut self) -> Result<()> {
-    if let Some(active) = self.frames.active_frame() {
+    if let Some(_active) = self.frames.active_frame() {
       unimplemented!()
       //self.frames.remove_window(*active);
     }
     Ok(())
-  }
-}
-
-// Rendering...
-impl Editor {
-  pub fn set_area(&mut self, area: Rect) {
-    //self.frames.set_area(area);
   }
 }

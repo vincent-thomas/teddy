@@ -5,8 +5,7 @@ use teddy_cursor::cursor_line::CursorLines;
 
 use crate::action::{Action, Notification, NotificationLevel};
 
-use super::keybinding::BindAction;
-use super::InnerFrame;
+use super::{keybinding::BindAction, Frame};
 
 fn get_linelen_above(index: usize, rope: &Rope) -> Option<usize> {
   if index == 0 {
@@ -44,7 +43,7 @@ fn get_cursor_lines_from_buffer(cursor_y: usize, buffer: &Rope) -> CursorLines {
 }
 
 impl BindAction for MoveLeftAction {
-  fn act(&self, frame: &mut InnerFrame) -> Result<Option<Action>> {
+  fn act(&self, frame: &mut Frame) -> Result<Option<Action>> {
     frame.cursor.move_left();
     Ok(None)
   }
@@ -54,7 +53,7 @@ impl BindAction for MoveLeftAction {
 pub struct MoveRightAction;
 
 impl BindAction for MoveRightAction {
-  fn act(&self, frame: &mut InnerFrame) -> Result<Option<Action>> {
+  fn act(&self, frame: &mut Frame) -> Result<Option<Action>> {
     let buffer = frame.buffer.get_buff();
     let (_, cursor_y) = frame.cursor.get();
 
@@ -69,7 +68,7 @@ impl BindAction for MoveRightAction {
 pub struct MoveUpAction;
 
 impl BindAction for MoveUpAction {
-  fn act(&self, frame: &mut InnerFrame) -> Result<Option<Action>> {
+  fn act(&self, frame: &mut Frame) -> Result<Option<Action>> {
     let buffer = frame.buffer.get_buff();
     let (_, cursor_y) = frame.cursor.get();
 
@@ -84,7 +83,7 @@ impl BindAction for MoveUpAction {
 pub struct MoveDownAction;
 
 impl BindAction for MoveDownAction {
-  fn act(&self, frame: &mut InnerFrame) -> Result<Option<Action>> {
+  fn act(&self, frame: &mut Frame) -> Result<Option<Action>> {
     let buffer = frame.buffer.get_buff();
     let (_, cursor_y) = frame.cursor.get();
 
@@ -99,7 +98,7 @@ impl BindAction for MoveDownAction {
 pub struct ToBeginningParagraph;
 
 impl BindAction for ToBeginningParagraph {
-  fn act(&self, frame: &mut InnerFrame) -> Result<Option<Action>> {
+  fn act(&self, frame: &mut Frame) -> Result<Option<Action>> {
     let buffer = frame.buffer.get_buff();
     let mut cursor = frame.cursor.get();
 
@@ -144,7 +143,7 @@ impl BindAction for ToBeginningParagraph {
 pub struct ToEndParagraph;
 
 impl BindAction for ToEndParagraph {
-  fn act(&self, frame: &mut InnerFrame) -> Result<Option<Action>> {
+  fn act(&self, frame: &mut Frame) -> Result<Option<Action>> {
     let buffer = frame.buffer.get_buff();
     let cursor = frame.cursor.get();
     let mut index = cursor.1 + 1;
@@ -177,7 +176,7 @@ impl BindAction for ToEndParagraph {
 pub struct MoveEndOfLine;
 
 impl BindAction for MoveEndOfLine {
-  fn act(&self, frame: &mut InnerFrame) -> Result<Option<Action>> {
+  fn act(&self, frame: &mut Frame) -> Result<Option<Action>> {
     let buffer = frame.buffer.get_buff();
 
     let cursor = frame.cursor.get();
@@ -196,7 +195,7 @@ impl BindAction for MoveEndOfLine {
 pub struct MoveStartOfLine;
 
 impl BindAction for MoveStartOfLine {
-  fn act(&self, frame: &mut InnerFrame) -> Result<Option<Action>> {
+  fn act(&self, frame: &mut Frame) -> Result<Option<Action>> {
     let buffer = frame.buffer.get_buff();
 
     let cursor = frame.cursor.get();
@@ -216,7 +215,7 @@ macro_rules! create_moveto_mode_action {
     #[derive(Debug)]
     pub struct $name;
     impl BindAction for $name {
-      fn act(&self, _frame: &mut InnerFrame) -> Result<Option<Action>> {
+      fn act(&self, _frame: &mut Frame) -> Result<Option<Action>> {
         Ok(Some(Action::ChangeMode(EditorMode::$mode)))
       }
     }
@@ -236,7 +235,7 @@ const WORD_SEPERATORS: &[char] = &[
 ];
 
 impl BindAction for SelectWordForward {
-  fn act(&self, frame: &mut InnerFrame) -> Result<Option<Action>> {
+  fn act(&self, frame: &mut Frame) -> Result<Option<Action>> {
     let buff = frame.buffer.get_buff();
     let cursor = frame.cursor.get();
 
@@ -272,7 +271,7 @@ impl BindAction for SelectWordForward {
 pub struct GotoNextWord;
 
 impl BindAction for GotoNextWord {
-  fn act(&self, frame: &mut InnerFrame) -> Result<Option<Action>> {
+  fn act(&self, frame: &mut Frame) -> Result<Option<Action>> {
     let buff = frame.buffer.get_buff();
     let cursor = frame.cursor.get();
 
@@ -306,7 +305,7 @@ impl BindAction for GotoNextWord {
 pub struct GotoPreviousWord;
 
 impl BindAction for GotoPreviousWord {
-  fn act(&self, frame: &mut InnerFrame) -> Result<Option<Action>> {
+  fn act(&self, frame: &mut Frame) -> Result<Option<Action>> {
     let buff = frame.buffer.get_buff();
     let cursor = frame.cursor.get();
 

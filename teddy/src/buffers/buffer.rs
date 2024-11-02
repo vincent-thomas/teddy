@@ -14,7 +14,7 @@ pub struct FileBuffer {
 }
 
 #[derive(Debug)]
-struct FileMetadata {
+pub(crate) struct FileMetadata {
   filename: String,
 }
 
@@ -57,7 +57,7 @@ impl FileBuffer {
 }
 
 impl Component for FileBuffer {
-  fn draw(&mut self, frame: &mut ratatui::Frame, area: ratatui::prelude::Rect) -> Result<()> {
+  fn draw(&self, frame: &mut ratatui::Frame, area: ratatui::prelude::Rect) -> Result<()> {
     let text = self.get_buff().to_string();
     let text = Paragraph::new(text);
 

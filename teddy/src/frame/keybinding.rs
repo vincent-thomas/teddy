@@ -6,7 +6,7 @@ use crossterm::event::KeyCode;
 use crate::action::Action;
 use crate::prelude::*;
 
-use super::InnerFrame;
+use super::Frame;
 
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub struct Selection {
@@ -50,7 +50,7 @@ enum BetweenChars {
 }
 
 pub trait BindAction: Debug {
-  fn act(&self, frame: &mut InnerFrame) -> Result<Option<Action>>;
+  fn act(&self, frame: &mut Frame) -> Result<Option<Action>>;
 }
 
 #[derive(Default)]

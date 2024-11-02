@@ -1,9 +1,7 @@
 use core::ops::Range;
-use std::collections::HashMap;
-
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
-use super::inputresolverv2::InputResult;
+use super::inputresolver::InputResult;
 use crate::{action::Action, editor::EditorMode};
 
 #[derive(Default, PartialEq, Debug)]
@@ -26,10 +24,13 @@ pub struct InputManager {
   latest_index: i64,
 }
 
-impl InputManager {
-  pub fn new() -> Self {
+impl Default for InputManager {
+  fn default() -> Self {
     Self { input_state: InputState::default(), master_buffer: Vec::new(), latest_index: -1 }
   }
+}
+
+impl InputManager {
   pub fn editor_mode(&self) -> &InputMode {
     &self.input_state.input_mode
   }
@@ -109,7 +110,6 @@ impl InputManager {
   }
 
   pub fn input(&mut self, input: KeyEvent) -> Option<Vec<InputResult>> {
-    dbg!(self.editor_mode(), &input);
     match self.editor_mode() {
       InputMode::Normal => self.simple_keybindings_normal(input),
       InputMode::Insert => self.simple_keybindings_insert(input),

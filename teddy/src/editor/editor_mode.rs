@@ -10,23 +10,10 @@ pub enum EditorMode {
 impl EditorMode {
   pub fn validate_mode_switch(&self, new_mode: &EditorMode) -> bool {
     match self {
-      EditorMode::Insert => match new_mode {
-        EditorMode::Visual => true,
-        EditorMode::Normal => true,
-        _ => false,
-      },
-      EditorMode::Visual => match new_mode {
-        EditorMode::Visual => true,
-        EditorMode::Normal => true,
-        _ => false,
-      },
+      EditorMode::Insert => matches!(new_mode, EditorMode::Visual | EditorMode::Normal),
+      EditorMode::Visual => matches!(new_mode, EditorMode::Visual | EditorMode::Normal),
+      EditorMode::Command => matches!(new_mode, EditorMode::Visual | EditorMode::Normal),
       EditorMode::Normal => true,
-
-      EditorMode::Command => match new_mode {
-        EditorMode::Visual => true,
-        EditorMode::Normal => true,
-        _ => false,
-      },
     }
   }
 }

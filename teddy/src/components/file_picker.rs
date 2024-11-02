@@ -20,11 +20,13 @@ pub struct FilePicker {
   list_item_focus: Option<usize>,
 }
 
-impl FilePicker {
-  pub fn new() -> Self {
+impl Default for FilePicker {
+  fn default() -> Self {
     Self::with_dir(std::env::current_dir().unwrap())
   }
+}
 
+impl FilePicker {
   pub fn with_dir(existing_dir: PathBuf) -> Self {
     let length: Vec<_> = existing_dir.read_dir().unwrap().collect();
     let mut this = Self { current_directory: existing_dir, list_item_focus: None };
@@ -91,10 +93,11 @@ impl FilePicker {
   }
 
   fn open_file(&mut self, path: PathBuf) -> Option<Action> {
-    let boxpath: Box<Path> = path.into();
+    let _boxpath: Box<Path> = path.into();
+    unimplemented!()
 
-    let file = FileBuffer::with_path(boxpath);
-    None
+    // let file = FileBuffer::with_path(boxpath);
+    // None
     //Some(Action::ReplaceActiveBuffer(Box::new(file)))
   }
 
@@ -134,7 +137,7 @@ impl Buffer for FilePicker {
 }
 
 impl Component for FilePicker {
-  fn draw(&mut self, frame: &mut ratatui::Frame, area: ratatui::prelude::Rect) -> Result<()> {
+  fn draw(&self, frame: &mut ratatui::Frame, area: ratatui::prelude::Rect) -> Result<()> {
     let mut files: Vec<ListItem> = std::fs::read_dir(&self.current_directory)?
       .map(|entry| entry.unwrap().path())
       .map(|pathbuf| {
