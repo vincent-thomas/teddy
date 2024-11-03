@@ -1,21 +1,35 @@
-use std::{error::Error, io::Stdout, path::Path};
+use std::{
+  error::Error,
+  io::Stdout,
+  path::Path,
+  sync::{Arc, RwLock},
+  time::Duration,
+};
 
+use chrono::Utc;
 use clier_parser::Argv;
 use ratatui::{
   layout::{Constraint, Layout, Rect},
   prelude::CrosstermBackend,
   Terminal,
 };
-use teddy_core::Application;
-use teddy_events::{Event, Events};
-use tokio::sync::mpsc;
+use teddy_core::{
+  action::{Action, Notification, NotificationLevel},
+  component::Component,
+  EventLoop,
+};
+use teddy_events::{Event, EventStream};
+use tokio::{
+  sync::{mpsc, Mutex},
+  task,
+};
 
 use crate::{
-  action::{Action, Notification, NotificationLevel},
   buffers::{buffer::FileBuffer, placeholder::PlaceholderBuffer},
-  components::{file_picker::FilePicker, Component},
+  components::file_picker::FilePicker,
   editor::Editor,
-  ui::ui,
+  frame::notification_manager::NotificationMessage,
+  ui::Renderer,
 };
 
 /// This should only hold state and not do any rendering..
@@ -26,14 +40,48 @@ pub struct Teddy {
   action_sender: mpsc::UnboundedSender<Action>,
 
   editor: Editor,
+  renderer: Renderer,
 
   should_quit: bool,
 }
 
-impl Application for Teddy {
-  type Events = Events;
+impl Teddy {
+  pub fn new(tui: CrosstermBackend<Stdout>) -> Self {
+    let (action_sender, action_receiver) = mpsc::unbounded_channel();
+
+    let config = teddy_config::ThemeConfig::default();
+
+    Teddy {
+      editor: Editor::new(action_sender.clone()),
+      renderer: Renderer::with_backend(tui, config),
+      action_receiver,
+      action_sender,
+      should_quit: false,
+    }
+  }
+
+  pub fn init(&mut self, args: Argv) -> crate::prelude::Result<()> {
+    self.editor.frames.add_window();
+    //if let Some(path) = args.commands.first() {
+    //  let path_buf: Box<Path> = Path::new(path).into();
+    //
+    //  let _boxed_buffer: Box<dyn Component> = match path_buf.is_dir() {
+    //    true => Box::new(FilePicker::default()),
+    //    false => Box::new(FileBuffer::with_path(path_buf)),
+    //  };
+    //
+    //  //self.action_sender.send(Action::OpenBuffer(boxed_buffer))?;
+    //} else {
+    //  let _placeholder = PlaceholderBuffer::default();
+    //  //self.action_sender.send(Action::OpenBuffer(Box::new(placeholder)))?;
+    //}
+    Ok(())
+  }
+}
+impl EventLoop for Teddy {
+  type Events = EventStream;
   type Error = Box<dyn Error>;
-  async fn run(&mut self, mut events: Events) -> Result<(), Self::Error> {
+  async fn run(&mut self, mut events: EventStream) -> Result<(), Self::Error> {
     loop {
       // Executing action part of event loop
       while let Ok(action) = self.action_receiver.try_recv() {
@@ -48,7 +96,7 @@ impl Application for Teddy {
       // Rendering the application
       // This is done after handling the action to ensure the UI is updated
       // Also after the quitting because of its useless.
-      ui(&mut self.editor)?;
+      self.renderer.ui(&mut self.editor)?;
 
       // Check for any events part of event loop
       if let Some(event) = events.next().await {
@@ -57,7 +105,7 @@ impl Application for Teddy {
             if let Err(action_error) = self.action_sender.send(actionable_action) {
               let msg = format!("Error: {}", action_error);
               let notification = Notification::new(NotificationLevel::Error, msg);
-              let action = Action::AttachNotification(notification);
+              let action = Action::AttachNotification(notification, 6);
               self.action_sender.send(action)?;
             }
           }
@@ -70,88 +118,20 @@ impl Application for Teddy {
 }
 
 impl Teddy {
-  #[tracing::instrument(name = "Application::new")]
-  pub fn new(tui: CrosstermBackend<Stdout>) -> Self {
-    tracing::info!("Initiating application");
-
-    let (action_sender, action_receiver) = mpsc::unbounded_channel();
-
-    Teddy {
-      editor: Editor::new(action_sender.clone(), tui),
-      action_receiver,
-      action_sender,
-      should_quit: false,
-    }
-  }
-
-  #[tracing::instrument(name = "Application::init", skip(self))]
-  pub fn init(&mut self, args: Argv) -> crate::prelude::Result<()> {
-    if let Some(path) = args.commands.first() {
-      let path_buf: Box<Path> = Path::new(path).into();
-
-      tracing::info!("Opening path: {:?}", &path);
-
-      let _boxed_buffer: Box<dyn Component> = match path_buf.is_dir() {
-        true => Box::new(FilePicker::default()),
-        false => Box::new(FileBuffer::with_path(path_buf)),
-      };
-
-      //self.action_sender.send(Action::OpenBuffer(boxed_buffer))?;
-    } else {
-      let _placeholder = PlaceholderBuffer::default();
-      //self.action_sender.send(Action::OpenBuffer(Box::new(placeholder)))?;
-    }
-    Ok(())
-  }
-
-  //pub async fn run(&mut self, mut events: Events) -> crate::prelude::Result<()> {
-  //  loop {
-  //    // Executing action part of event loop
-  //    while let Ok(action) = self.action_receiver.try_recv() {
-  //      tracing::trace!("action {:?}", &action);
-  //      self.handle_action(action)?;
-  //    }
-  //
-  //    if self.should_quit {
-  //      break;
-  //    }
-  //
-  //    // Rendering the application
-  //    // This is done after handling the action to ensure the UI is updated
-  //    // Also after the quitting because of its useless.
-  //    ui(&mut self.editor)?;
-  //
-  //    // Check for any events part of event loop
-  //    if let Some(event) = events.next().await {
-  //      if let Some(actionable_actions) = self.handle_event(event).await? {
-  //        for actionable_action in actionable_actions {
-  //          if let Err(action_error) = self.action_sender.send(actionable_action) {
-  //            let msg = format!("Error: {}", action_error);
-  //            let notification = Notification::new(NotificationLevel::Error, msg);
-  //            let action = Action::AttachNotification(notification);
-  //            self.action_sender.send(action)?;
-  //          }
-  //        }
-  //      }
-  //    }
-  //  }
-  //
-  //  Ok(())
-  //}
-
   async fn handle_event(&mut self, event: Event) -> crate::prelude::Result<Option<Vec<Action>>> {
     use crossterm::event::Event as CrosstermEvent;
     let output = match event {
-      Event::Render => ui(&mut self.editor).map(|_| None)?,
+      //Event::Render => ui(&mut self.editor).map(|_| None)?,
       Event::Crossterm(CrosstermEvent::Key(key)) => self.editor.keyevent(key),
       Event::Crossterm(CrosstermEvent::Resize(x, y)) => {
         Some(Vec::from_iter([Action::Resize(x, y)]))
       }
       Event::Crossterm(CrosstermEvent::Mouse(mouse)) => None,
-      Event::EventStreamError(err) => {
-        // TODO: For now
-        panic!("EventStreamError: {:?}", err);
-      }
+      Event::Render => None,
+      //Event::EventStreamError(err) => {
+      //  // TODO: For now
+      //  panic!("EventStreamError: {:?}", err);
+      //}
       _ => unimplemented!("{:?}", event),
     };
 
@@ -163,16 +143,15 @@ impl Teddy {
       Action::Quit => {
         self.should_quit = true;
       }
-      //Action::OpenBuffer(component) => {
-      //  self.editor.open_buffer(component)?;
-      //}
-      //Action::ReplaceActiveBuffer(buffer) => {
-      //  self.editor.replace_active_buffer(buffer)?;
-      //}
-      Action::Resize(_x, _y) => ui(&mut self.editor)?,
-      Action::ChangeMode(mode) => self.editor.try_change_editor_mode(mode)?,
+      Action::Resize(_x, _y) => self.renderer.ui(&self.editor)?,
+      //Action::ChangeMode(mode) => self.editor.try_change_editor_mode(mode)?,
       Action::CloseActiveBuffer => self.editor.remove_active_buffer()?,
       Action::WriteActiveBuffer => self.editor.write_active_buffer()?,
+      Action::AttachNotification(notification, time) => self
+        .editor
+        .frames
+        .notification_manager
+        .append(NotificationMessage::new(notification, Utc::now().timestamp() + time as i64)),
       _ => tracing::error!("Error: {action:?} is not implemented"),
     };
     Ok(())

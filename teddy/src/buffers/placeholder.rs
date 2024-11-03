@@ -1,9 +1,9 @@
-use crate::buffers::Buffer;
-use crate::components::Component;
-
 use crate::prelude::Result;
 
 use ratatui::text::Text;
+use teddy_core::action::Action;
+use teddy_core::buffer::Buffer;
+use teddy_core::component::Component;
 
 pub struct PlaceholderBuffer(ropey::Rope);
 
@@ -20,22 +20,16 @@ impl Buffer for PlaceholderBuffer {
 }
 
 impl Component for PlaceholderBuffer {
-  fn draw(& self, frame: &mut ratatui::Frame, area: ratatui::prelude::Rect) -> Result<()> {
+  fn draw(&self, frame: &mut ratatui::Frame, area: ratatui::prelude::Rect) -> Result<()> {
     frame.render_widget(Text::from(self.0.to_string()), area);
     Ok(())
   }
 
-  fn handle_key_event(
-    &mut self,
-    key: crossterm::event::KeyEvent,
-  ) -> Result<Option<crate::action::Action>> {
+  fn handle_key_event(&mut self, key: crossterm::event::KeyEvent) -> Result<Option<Action>> {
     todo!()
   }
 
-  fn handle_mouse_event(
-    &mut self,
-    mouse: crossterm::event::MouseEvent,
-  ) -> Result<Option<crate::action::Action>> {
+  fn handle_mouse_event(&mut self, mouse: crossterm::event::MouseEvent) -> Result<Option<Action>> {
     todo!()
   }
 }

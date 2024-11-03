@@ -1,28 +1,66 @@
+use std::io::Stdout;
+mod frame_manager;
+mod render_wrappers;
+mod statusbar;
+mod underbar;
+
 use ratatui::{
-  layout::{Constraint, Direction, Layout},
-  style::Style,
+  buffer::Buffer,
+  layout::{Constraint, Direction, Layout, Rect},
+  prelude::CrosstermBackend,
+  style::{Color, Modifier, Style},
   text::Text,
+  widgets::Widget,
+  Frame, Terminal,
 };
+use render_wrappers::notification_manager::NotificationManagerRenderer;
+use statusbar::StatusBar;
+use teddy_config::{Config, ThemeConfig};
+use teddy_core::input_mode::InputMode;
 
-use crate::{components::Component, editor::Editor};
+use underbar::UnderBar;
 
-pub fn ui(editor: &mut Editor) -> Result<(), Box<dyn std::error::Error>> {
-  editor.terminal.draw(|frame| {
-    let area = frame.size();
+use crate::editor::Editor;
 
-    let layout =
-      Layout::vertical([Constraint::Fill(1), Constraint::Length(1), Constraint::Length(1)])
-        .split(area);
-    //editor.frames.set_area(layout[0]);
-    //editor.frames.draw(frame, layout[0]).unwrap();
+pub struct Renderer(Terminal<CrosstermBackend<Stdout>>, ThemeConfig);
 
-    let chunks = Layout::default()
-      .direction(Direction::Horizontal)
-      .constraints([Constraint::Length(10), Constraint::Length(10)])
-      .split(layout[1]);
-    frame.render_widget(Text::styled("Status", Style::default()), chunks[0]);
-    frame.render_widget(Text::styled("Mode", Style::default()), chunks[1]);
-  })?;
+impl Renderer {
+  pub fn with_backend(backend: CrosstermBackend<Stdout>, config: ThemeConfig) -> Self {
+    Self(Terminal::new(backend).unwrap(), config)
+  }
+  pub fn ui(&mut self, editor: &Editor) -> Result<(), Box<dyn std::error::Error>> {
+    self.0.draw(|frame| {
+      draw(editor, frame, self.1);
+    })?;
+
+    Ok(())
+  }
+}
+
+fn draw(
+  editor: &Editor,
+  frame: &mut Frame<'_>,
+  config: ThemeConfig,
+) -> Result<(), Box<dyn std::error::Error>> {
+  let area = frame.size();
+  let buffer = frame.buffer_mut();
+
+  let testing = NotificationManagerRenderer(editor.frames.notification_manager.clone());
+  testing.render(area, buffer);
+
+  buffer.set_style(area, Style::default().bg(config.background));
+
+  let layout =
+    Layout::vertical([Constraint::Fill(1), Constraint::Length(1), Constraint::Length(1)])
+      .split(area);
+
+  let bar = StatusBar { editor, config };
+  bar.ui(layout[1], buffer);
+
+  let underbar = UnderBar { editor, config };
+  if let Some((x, y)) = underbar.ui(layout[2], buffer) {
+    frame.set_cursor(x, y);
+  }
 
   Ok(())
 }

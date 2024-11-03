@@ -4,3 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+ropey = "1.6.1"
+tokio.workspace = true
+crossterm.workspace = true
+ratatui.workspace = true
+teddy_events.path = "../teddy_events"

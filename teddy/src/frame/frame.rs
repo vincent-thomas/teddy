@@ -1,14 +1,14 @@
 use std::fmt::Debug;
 
 use crossterm::event::{KeyCode, KeyEvent, MouseEventKind};
+use teddy_core::action::Action;
+use teddy_core::buffer::Buffer;
+use teddy_core::component::Component;
 use teddy_cursor::Cursor;
 use tokio::sync::mpsc::UnboundedSender;
 
 use crate::buffers::placeholder::PlaceholderBuffer;
 use crate::prelude::*;
-
-use crate::action::Action;
-use crate::components::Component;
 
 use super::keybinding::Selection;
 
@@ -41,12 +41,18 @@ impl Default for Frame {
   }
 }
 
+impl Buffer for Frame {
+  fn get_buff(&self) -> ropey::Rope {
+    self.get_buff()
+  }
+}
+
 impl Frame {
   pub fn insert(&mut self, _keyevent: KeyEvent) -> Result<()> {
     Ok(())
   }
 
-  pub fn render(&self, f: &mut ratatui::Frame, area: ratatui::prelude::Rect) {
+  pub fn render(&self, f: &mut ratatui::buffer::Buffer, area: ratatui::prelude::Rect) {
     self.buffer.draw(f, area).expect("Didn't work :(")
   }
 }

@@ -1,9 +1,8 @@
-use crate::editor::EditorMode;
 use crate::prelude::*;
 use ropey::Rope;
 use teddy_cursor::cursor_line::CursorLines;
 
-use crate::action::{Action, Notification, NotificationLevel};
+use teddy_core::action::{Action, Notification, NotificationLevel};
 
 use super::{keybinding::BindAction, Frame};
 
@@ -210,21 +209,21 @@ impl BindAction for MoveStartOfLine {
   }
 }
 
-macro_rules! create_moveto_mode_action {
-  ($name:ident, $mode:ident) => {
-    #[derive(Debug)]
-    pub struct $name;
-    impl BindAction for $name {
-      fn act(&self, _frame: &mut Frame) -> Result<Option<Action>> {
-        Ok(Some(Action::ChangeMode(EditorMode::$mode)))
-      }
-    }
-  };
-}
+//macro_rules! create_moveto_mode_action {
+//  ($name:ident, $mode:ident) => {
+//    #[derive(Debug)]
+//    pub struct $name;
+//    impl BindAction for $name {
+//      fn act(&self, _frame: &mut Frame) -> Result<Option<Action>> {
+//        Ok(Some(Action::ChangeMode(EditorMode::$mode)))
+//      }
+//    }
+//  };
+//}
 
-create_moveto_mode_action!(MoveToCommandMode, Command);
-create_moveto_mode_action!(MoveToVisualMode, Visual);
-create_moveto_mode_action!(MoveToInsertMode, Insert);
+//create_moveto_mode_action!(MoveToCommandMode, Command);
+//create_moveto_mode_action!(MoveToVisualMode, Visual);
+//create_moveto_mode_action!(MoveToInsertMode, Insert);
 
 #[derive(Debug)]
 pub struct SelectWordForward;
@@ -333,7 +332,7 @@ impl BindAction for GotoPreviousWord {
       if index == 0 {
         let notification =
           Notification::new(NotificationLevel::Info, "No other word before this one".to_string());
-        return Ok(Some(Action::AttachNotification(notification)));
+        return Ok(Some(Action::AttachNotification(notification, 4)));
       }
 
       index -= 1;

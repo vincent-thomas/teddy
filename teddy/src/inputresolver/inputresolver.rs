@@ -1,19 +1,19 @@
 use std::collections::HashMap;
 
 use super::{
-  input_manager::{InputManager, InputMode},
+  input_manager::InputManager,
   utils::{self, KeyEventExt as _},
 };
 use crossterm::event::{KeyCode, KeyEvent};
 
-use crate::action::Action;
+use teddy_core::{action::Action, input_mode::InputMode};
 
 enum MacroCheckReturn {
   Continue,
   Ignore,
   Some(Vec<InputResult>),
 }
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq)]
 pub enum InputResult {
   Insert(KeyEvent),
   CausedAction(Action),
@@ -28,7 +28,7 @@ pub struct InputResolverV2 {
   macro_stores: HashMap<char, (usize, Option<usize>)>,
   macro_store_tracker: Option<MacroStoreTrackerV2>,
 
-  input_manager: InputManager,
+  pub input_manager: InputManager,
 }
 
 impl InputResolverV2 {

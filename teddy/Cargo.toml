@@ -8,6 +8,7 @@ edition = "2021"
 teddy_cursor = { path = "../teddy_cursor" }
 teddy_core = { path = "../teddy_core" }
 teddy_events = { path = "../teddy_events" }
+teddy_config.path = "../teddy_config"
 
 tokio = {workspace = true}
 crossterm = { workspace = true }
@@ -19,3 +20,4 @@ tracing-subscriber = { version = "0.3.18", features = ["registry", "fmt"] }
 color-eyre = "0.6.3"
 rand = "0.8.5"
 ropey = "1.6.1"
+chrono = "0.4.38"

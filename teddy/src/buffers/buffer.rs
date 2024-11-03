@@ -1,4 +1,4 @@
-use crate::{buffers::Buffer, components::Component, prelude::Result};
+use crate::prelude::Result;
 use std::{
   fs::{self, File},
   path::Path,
@@ -6,6 +6,7 @@ use std::{
 
 use ratatui::widgets::Paragraph;
 use ropey::Rope;
+use teddy_core::{action::Action, buffer::Buffer, component::Component};
 
 #[derive(Default, Debug)]
 pub struct FileBuffer {
@@ -65,17 +66,11 @@ impl Component for FileBuffer {
     Ok(())
   }
 
-  fn handle_key_event(
-    &mut self,
-    key: crossterm::event::KeyEvent,
-  ) -> Result<Option<crate::action::Action>> {
+  fn handle_key_event(&mut self, key: crossterm::event::KeyEvent) -> Result<Option<Action>> {
     Ok(None)
   }
 
-  fn handle_mouse_event(
-    &mut self,
-    mouse: crossterm::event::MouseEvent,
-  ) -> Result<Option<crate::action::Action>> {
+  fn handle_mouse_event(&mut self, mouse: crossterm::event::MouseEvent) -> Result<Option<Action>> {
     Ok(None)
   }
 }

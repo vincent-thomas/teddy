@@ -2,12 +2,10 @@ use std::io::Stdout;
 
 use crossterm::event::KeyEvent;
 use ratatui::{prelude::*, Terminal};
+use teddy_core::{action::Action, component::Component};
 use tokio::sync::mpsc::UnboundedSender;
 
 use crate::{
-  action::Action,
-  components::Component,
-  editor::EditorMode,
   frame::manager::FrameManager,
   inputresolver::{InputResolverV2, InputResult},
   prelude::Result,
@@ -15,25 +13,13 @@ use crate::{
 
 pub struct Editor {
   pub frames: FrameManager,
-  pub terminal: Terminal<CrosstermBackend<Stdout>>,
-  editor_mode: EditorMode,
 
-  input_resolver: InputResolverV2,
+  pub input_resolver: InputResolverV2,
   //sender: UnboundedSender<Action>,
 }
 
 // Event Loop
 impl Editor {
-  pub fn try_change_editor_mode(&mut self, mode: EditorMode) -> Result<()> {
-    let result = self.editor_mode.validate_mode_switch(&mode);
-
-    if result {
-      self.editor_mode = mode;
-    }
-
-    Ok(())
-  }
-
   pub fn keyevent(&mut self, event: KeyEvent) -> Option<Vec<Action>> {
     let result = self.input_resolver.input(event).unwrap_or_default();
     let mut stuff = Vec::new();
@@ -82,16 +68,13 @@ impl Editor {
   }
 }
 impl Editor {
-  pub fn new(sender: UnboundedSender<Action>, backend: CrosstermBackend<Stdout>) -> Self {
+  pub fn new(sender: UnboundedSender<Action>) -> Self {
     tracing::info!("Initiating Editor");
 
     let frames = FrameManager::new(sender.clone());
-    let terminal = Terminal::new(backend).unwrap();
 
     Self {
       frames,
-      editor_mode: EditorMode::default(),
-      terminal,
       input_resolver: InputResolverV2::default(),
       //sender,
     }
@@ -109,7 +92,8 @@ impl Editor {
 // Buffer Modification
 impl Editor {
   pub fn write_active_buffer(&mut self) -> Result<()> {
-    unimplemented!();
+    //unimplemented!();
+    Ok(())
   }
   pub fn open_buffer(&mut self, _buffer: Box<dyn Component>) -> Result<()> {
     tracing::info!("Opening buffer");

@@ -10,10 +10,9 @@ use std::{
   path::{Path, PathBuf},
 };
 
-use crate::{
-  action::Action, buffers::buffer::FileBuffer, buffers::Buffer, components::Component, prelude::*,
-};
+use crate::{buffers::buffer::FileBuffer, prelude::*};
 use crossterm::event::{KeyCode, KeyEvent};
+use teddy_core::{action::Action, buffer::Buffer, component::Component};
 
 pub struct FilePicker {
   current_directory: PathBuf,

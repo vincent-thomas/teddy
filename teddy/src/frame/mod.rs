@@ -1,6 +1,6 @@
 mod frame;
+pub mod notification_manager;
 pub use frame::*;
 
-mod default_bindings;
 mod keybinding;
 pub mod manager;

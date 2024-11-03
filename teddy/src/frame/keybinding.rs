@@ -2,8 +2,8 @@ use std::collections::HashMap;
 use std::fmt::Debug;
 
 use crossterm::event::KeyCode;
+use teddy_core::action::Action;
 
-use crate::action::Action;
 use crate::prelude::*;
 
 use super::Frame;
