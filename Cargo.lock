@@ -858,6 +858,7 @@ dependencies = [
 name = "teddy_cursor"
 version = "0.1.0"
 dependencies = [
+ "teddy_core",
  "tracing",
 ]
 

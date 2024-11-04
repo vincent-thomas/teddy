@@ -17,7 +17,20 @@ enum MacroCheckReturn {
 pub enum InputResult {
   Insert(KeyEvent),
   CausedAction(Action),
+  CursorIntent(CursorMovement),
 }
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum CursorMovement {
+  Up,
+  Down,
+  Left,
+  Right,
+
+  Readjust,
+  Custom(usize),
+}
+
 enum MacroStoreTrackerV2 {
   Recording { registry: Option<char> },
   Replaying,

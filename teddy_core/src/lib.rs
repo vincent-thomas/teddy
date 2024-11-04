@@ -9,3 +9,5 @@ pub mod action;
 pub mod buffer;
 pub mod component;
 pub mod input_mode;
+
+pub use ropey::Rope;

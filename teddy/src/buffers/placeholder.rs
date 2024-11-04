@@ -2,8 +2,9 @@ use crate::prelude::Result;
 
 use ratatui::text::Text;
 use ratatui::widgets::Widget;
+use ropey::Rope;
 use teddy_core::action::Action;
-use teddy_core::buffer::Buffer;
+use teddy_core::buffer::{Buffer, WritableBuffer};
 use teddy_core::component::Component;
 
 pub struct PlaceholderBuffer(ropey::Rope);
@@ -15,8 +16,14 @@ impl Default for PlaceholderBuffer {
 }
 
 impl Buffer for PlaceholderBuffer {
-  fn get_buff(&self) -> ropey::Rope {
+  fn buff(&self) -> ropey::Rope {
     self.0.clone()
+  }
+}
+
+impl WritableBuffer for PlaceholderBuffer {
+  fn buff_mut(&mut self) -> &mut Rope {
+    &mut self.0
   }
 }
 

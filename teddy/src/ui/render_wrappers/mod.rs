@@ -19,7 +19,7 @@ impl Widget for InputModeRenderer<'_> {
     let mode_color = match self.0 {
       InputMode::Normal => Color::Blue,
       InputMode::Command(_) => Color::Gray,
-      InputMode::Insert => Color::Green,
+      InputMode::Insert { left_insert: _ } => Color::Green,
       InputMode::Visual(_) => Color::Red,
     };
 

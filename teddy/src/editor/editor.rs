@@ -1,9 +1,9 @@
 use crossterm::event::KeyEvent;
-use teddy_core::{action::Action, component::Component};
+use teddy_core::{action::Action, buffer::Buffer, component::Component};
 
 use crate::{
   frame::manager::FrameManager,
-  inputresolver::{InputResolverV2, InputResult},
+  inputresolver::{CursorMovement, InputResolverV2, InputResult},
   prelude::Result,
 };
 
@@ -29,27 +29,34 @@ impl Editor {
           None
         }
         InputResult::CausedAction(action) => Some(action),
-        //InputResult::CursorIntent(test) => {
-        //  match test {
-        //    CursorMovement::Down => {
-        //      todo!();
-        //      //self.cursor.move_down();
-        //    }
-        //    CursorMovement::Up => {
-        //      todo!();
-        //      //self.cursor.move_up();
-        //    }
-        //    CursorMovement::Left => {
-        //      todo!();
-        //      //self.cursor.move_left();
-        //    }
-        //    CursorMovement::Right => {
-        //      todo!();
-        //      //self.cursor.move_right();
-        //    }
-        //  }
-        //  None
-        //}
+        InputResult::CursorIntent(test) => {
+          let Some(active_frame) = self.frames.active_frame_mut() else {
+            return None;
+          };
+          let buff = active_frame.buff();
+          match test {
+            CursorMovement::Down => {
+              active_frame.cursor.cursor.move_down(&buff);
+            }
+            CursorMovement::Up => {
+              active_frame.cursor.cursor.move_up(&buff);
+            }
+            CursorMovement::Left => {
+              active_frame.cursor.cursor.move_left(&buff);
+            }
+            CursorMovement::Right => {
+              active_frame
+                .cursor
+                .cursor
+                .move_right(&buff, &self.input_resolver.input_manager.input_mode);
+            }
+            CursorMovement::Readjust => {
+              active_frame.cursor.cursor.readjust(&buff);
+            }
+            CursorMovement::Custom(_) => todo!(),
+          }
+          None
+        }
       };
 
       if let Some(existing_action) = action {

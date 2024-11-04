@@ -1,17 +1,22 @@
+mod statusbar;
+
 use ratatui::{
-  layout::Rect,
+  layout::{Constraint, Layout, Rect},
   style::{Color, Style},
   text::{Line, Span, Text},
   widgets::Widget,
   Frame,
 };
+use statusbar::StatusBar;
+use teddy_config::Config;
+use teddy_core::buffer::Buffer;
 //use teddy_config::Config;
 
 use crate::editor::Editor;
 
 pub struct FrameManagerRenderer<'a> {
-  pub editor: &'a Editor,
-  //pub config: &'a Config,
+  pub editor: &'a mut Editor,
+  pub config: &'a Config,
 }
 fn count_digits(mut n: i32) -> usize {
   if n == 0 {
@@ -25,10 +30,20 @@ fn count_digits(mut n: i32) -> usize {
   }
   count
 }
-impl crate::frame::Frame {
-  pub fn ui(&self, area: Rect, frame: &mut Frame<'_>) {
+
+pub struct FrameRenderer<'a> {
+  pub editor: &'a mut Editor,
+  pub config: &'a Config,
+}
+impl FrameRenderer<'_> {
+  pub fn ui(&mut self, area: Rect, frame: &mut Frame<'_>) {
     let buffer = frame.buffer_mut();
-    let buffer_str = self.buffer.get_buff().to_string();
+    let Some(active_frame) = self.editor.frames.active_frame_mut() else { panic!("the fuuuck") };
+
+    let buffer_str = active_frame.buff().to_string();
+
+    let layout =
+      Layout::default().constraints([Constraint::Fill(1), Constraint::Length(1)]).split(area);
 
     let buffer_len = buffer_str.len();
     let max_line_len = count_digits(buffer_len as i32);
@@ -44,20 +59,26 @@ impl crate::frame::Frame {
     });
 
     let render_text = Text::from_iter(render_lines);
-    render_text.render(area, buffer);
+    render_text.render(layout[0], buffer);
 
-    let (x, y) = self.cursor.cursor.get();
+    let (x, y) = active_frame.cursor.cursor.get();
     frame.set_cursor(x as u16 + max_line_len as u16 + 2, y as u16);
+
+    let bar = StatusBar { editor: self.editor, config: self.config.theme };
+
+    bar.ui(layout[1], frame);
   }
 }
 
 impl FrameManagerRenderer<'_> {
-  pub fn ui(&self, area: Rect, frame: &mut Frame<'_>) {
-    let Some(active_frame) = self.editor.frames.active_frame() else {
+  pub fn ui(&mut self, area: Rect, frame: &mut Frame<'_>) {
+    let Some(active_frame) = self.editor.frames.active_frame_mut() else {
       // Nothing to render
       return;
     };
 
-    active_frame.ui(area, frame);
+    let mut frame_renderer = FrameRenderer { editor: self.editor, config: self.config };
+
+    frame_renderer.ui(area, frame);
   }
 }

@@ -1,7 +1,7 @@
 use core::ops::Range;
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
-use super::{commands::CommandManager, inputresolver::InputResult};
+use super::{commands::CommandManager, inputresolver::InputResult, CursorMovement};
 use teddy_core::{
   action::{Action, Notification, NotificationLevel},
   input_mode::InputMode,
@@ -64,8 +64,14 @@ impl InputManager {
         ])
       }
       (KeyModifiers::NONE, KeyCode::Char('i')) => {
-        self.input_mode = InputMode::Insert;
+        self.input_mode = InputMode::Insert { left_insert: true };
         None
+      }
+
+      (KeyModifiers::NONE, KeyCode::Char('a')) => {
+        self.input_mode = InputMode::Insert { left_insert: false };
+
+        Some(vec![InputResult::CursorIntent(CursorMovement::Right)])
       }
       (KeyModifiers::NONE, KeyCode::Char(':')) => {
         self.input_mode = InputMode::Command(teddy_core::input_mode::CommandModeData {
@@ -77,6 +83,22 @@ impl InputManager {
       (KeyModifiers::NONE, KeyCode::Char('v')) => {
         panic!("Get cursor here");
       }
+      (KeyModifiers::NONE, KeyCode::Char('l')) => {
+        // Om texten ändras, ändra testet också
+        Some(vec![InputResult::CursorIntent(CursorMovement::Right)])
+      }
+      (KeyModifiers::NONE, KeyCode::Char('h')) => {
+        // Om texten ändras, ändra testet också
+        Some(vec![InputResult::CursorIntent(CursorMovement::Left)])
+      }
+      (KeyModifiers::NONE, KeyCode::Char('j')) => {
+        // Om texten ändras, ändra testet också
+        Some(vec![InputResult::CursorIntent(CursorMovement::Down)])
+      }
+      (KeyModifiers::NONE, KeyCode::Char('k')) => {
+        // Om texten ändras, ändra testet också
+        Some(vec![InputResult::CursorIntent(CursorMovement::Up)])
+      }
       _ => None,
     }
   }
@@ -84,11 +106,36 @@ impl InputManager {
   fn simple_keybindings_insert(&mut self, input: KeyEvent) -> Option<Vec<InputResult>> {
     match input.code {
       KeyCode::Esc => {
+        let old_input = self.input_mode.clone();
         self.input_mode = InputMode::Normal;
 
+        if let InputMode::Insert { left_insert } = old_input {
+          if !left_insert {
+            return Some(vec![InputResult::CursorIntent(CursorMovement::Left)]);
+          }
+        };
         None
       }
-      _ => Some(vec![InputResult::Insert(input)]),
+      KeyCode::Right => {
+        // Om texten ändras, ändra testet också
+        Some(vec![InputResult::CursorIntent(CursorMovement::Right)])
+      }
+      KeyCode::Left => {
+        // Om texten ändras, ändra testet också
+        Some(vec![InputResult::CursorIntent(CursorMovement::Left)])
+      }
+      KeyCode::Down => {
+        // Om texten ändras, ändra testet också
+        Some(vec![InputResult::CursorIntent(CursorMovement::Down)])
+      }
+      KeyCode::Up => {
+        // Om texten ändras, ändra testet också
+        Some(vec![InputResult::CursorIntent(CursorMovement::Up)])
+      }
+      KeyCode::Backspace => {
+        Some(vec![InputResult::Insert(input), InputResult::CursorIntent(CursorMovement::Left)])
+      }
+      _ => Some(vec![InputResult::Insert(input), InputResult::CursorIntent(CursorMovement::Right)]),
     }
   }
 
@@ -181,7 +228,7 @@ impl InputManager {
   pub fn input(&mut self, input: KeyEvent) -> Option<Vec<InputResult>> {
     match self.editor_mode() {
       InputMode::Normal => self.simple_keybindings_normal(input),
-      InputMode::Insert => self.simple_keybindings_insert(input),
+      InputMode::Insert { left_insert: _ } => self.simple_keybindings_insert(input),
       InputMode::Command(_) => self.simple_keybindings_command(input),
       InputMode::Visual(_) => self.simple_keybindings_visual(input),
     }

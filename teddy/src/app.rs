@@ -122,7 +122,7 @@ impl Teddy {
       Action::Quit => {
         self.should_quit = true;
       }
-      Action::Resize(_x, _y) => self.renderer.ui(&self.editor)?,
+      Action::Resize(_x, _y) => self.renderer.ui(&mut self.editor)?,
       //Action::ChangeMode(mode) => self.editor.try_change_editor_mode(mode)?,
       Action::CloseActiveBuffer => self.editor.remove_active_buffer()?,
       Action::WriteActiveBuffer => self.editor.write_active_buffer()?,
