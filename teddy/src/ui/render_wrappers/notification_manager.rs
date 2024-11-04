@@ -15,7 +15,7 @@ impl NotificationManagerRenderer {
     let area = frame.size();
     let buf = frame.buffer_mut();
 
-    let rendered_text: Vec<Line> = self
+    let mut rendered_text: Vec<Line> = self
       .0
       .vec
       .iter()
@@ -51,14 +51,23 @@ impl NotificationManagerRenderer {
       })
       .collect();
 
-    let text = Text::from(rendered_text.clone());
-
     let height = rendered_text.len();
     let width = 40;
 
-    let area =
-      Rect::new(area.width - width as u16, area.height - height as u16 - 2, width, height as u16);
+    let area_height = area.height.saturating_sub(height as u16).saturating_sub(2);
 
+    if rendered_text.len() > area.height.saturating_sub(2).into() {
+      // If overflow.
+      rendered_text = rendered_text
+        .iter()
+        .skip(rendered_text.len() - area.height.saturating_sub(2) as usize)
+        .cloned()
+        .collect();
+    }
+
+    let area = Rect::new(area.width - width as u16, area_height, width, height as u16);
+
+    let text = Text::from(rendered_text);
     text.render(area, buf);
   }
 }

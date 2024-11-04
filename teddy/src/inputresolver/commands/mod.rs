@@ -1,6 +1,7 @@
 mod echo;
 pub mod quit;
 mod write;
+mod write_and_quit;
 
 use std::{collections::HashMap, error::Error};
 
@@ -8,6 +9,7 @@ use echo::EchoCommand;
 use quit::QuitCommand;
 use teddy_core::action::Action;
 use write::WriteCommand;
+use write_and_quit::WriteAndQuitCommand;
 
 pub trait Command {
   fn act(&mut self, query: &str) -> Result<Option<Vec<Action>>, Box<dyn Error>>;
@@ -38,6 +40,14 @@ impl CommandManager {
       CommandEntry {
         description: Some("Quits the editor".to_string()),
         cmd: Box::new(QuitCommand),
+      },
+    );
+
+    self.registry.insert(
+      "wq".to_string(),
+      CommandEntry {
+        description: Some("Writes current buffer and then quits the editor".to_string()),
+        cmd: Box::new(WriteAndQuitCommand),
       },
     );
   }

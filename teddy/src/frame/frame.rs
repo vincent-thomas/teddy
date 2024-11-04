@@ -29,7 +29,7 @@ pub struct CursorManager {
 }
 
 impl CursorManager {
-  pub fn with_buffer_len(len: usize) -> Self {
+  pub fn with_buffer_len(_len: usize) -> Self {
     Self { cursor: Cursor::default(), select: None }
   }
 }
