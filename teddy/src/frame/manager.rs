@@ -1,43 +1,35 @@
 use std::collections::HashMap;
 
-use teddy_core::action::Action;
-use tokio::sync::mpsc::UnboundedSender;
-
 use super::{notification_manager::NotificationManager, Frame};
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct FrameManager {
   pub frames: HashMap<u16, Frame>,
   active_frame_id: Option<u16>,
-  action_sender: UnboundedSender<Action>,
 
   pub notification_manager: NotificationManager,
 }
 
 impl FrameManager {
-  pub fn new(action_sender: UnboundedSender<Action>) -> Self {
-    Self {
-      action_sender,
-      frames: HashMap::new(),
-      active_frame_id: None,
-      notification_manager: NotificationManager::default(),
-    }
+  //pub fn new() -> Self {
+  //  Self {
+  //    frames: HashMap::new(),
+  //    active_frame_id: None,
+  //    notification_manager: NotificationManager::default(),
+  //  }
+  //}
+  pub fn active_frame(&self) -> Option<&Frame> {
+    self.frames.get(&self.active_frame_id?)
   }
-  pub fn active_frame(&mut self) -> Option<&mut Frame> {
+
+  pub fn active_frame_mut(&mut self) -> Option<&mut Frame> {
     self.frames.get_mut(&self.active_frame_id?)
   }
   pub fn add_window(&mut self) -> crate::prelude::Result<u16> {
     let id = rand::random();
 
-    let mut frame = Frame::default();
-
-    //frame.register_action_handler(
-    //  self.action_sender.clone().expect("internal_error: No action sender"),
-    //)?;
-
-    //frame.init()?;
-
-    self.frames.insert(id, frame);
+    self.frames.insert(id, Frame::default());
+    self.active_frame_id = Some(id);
 
     Ok(id)
   }

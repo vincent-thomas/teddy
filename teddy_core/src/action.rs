@@ -1,7 +1,7 @@
-use std::{fmt::Debug, path::PathBuf, sync::Arc};
+use std::{fmt::Debug, path::PathBuf};
 
 /// Every single action a component can take outside the editor.
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub enum Action {
   Quit,
 

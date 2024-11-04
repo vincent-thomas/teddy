@@ -1,36 +1,16 @@
-use std::{
-  error::Error,
-  io::Stdout,
-  path::Path,
-  sync::{Arc, RwLock},
-  time::Duration,
-};
+use std::{error::Error, io::Stdout};
 
 use chrono::Utc;
 use clier_parser::Argv;
-use ratatui::{
-  layout::{Constraint, Layout, Rect},
-  prelude::CrosstermBackend,
-  Terminal,
-};
+use ratatui::prelude::CrosstermBackend;
 use teddy_core::{
   action::{Action, Notification, NotificationLevel},
-  component::Component,
   EventLoop,
 };
 use teddy_events::{Event, EventStream};
-use tokio::{
-  sync::{mpsc, Mutex},
-  task,
-};
+use tokio::sync::mpsc;
 
-use crate::{
-  buffers::{buffer::FileBuffer, placeholder::PlaceholderBuffer},
-  components::file_picker::FilePicker,
-  editor::Editor,
-  frame::notification_manager::NotificationMessage,
-  ui::Renderer,
-};
+use crate::{editor::Editor, frame::notification_manager::NotificationMessage, ui::Renderer};
 
 /// This should only hold state and not do any rendering..
 pub struct Teddy {
@@ -49,10 +29,10 @@ impl Teddy {
   pub fn new(tui: CrosstermBackend<Stdout>) -> Self {
     let (action_sender, action_receiver) = mpsc::unbounded_channel();
 
-    let config = teddy_config::ThemeConfig::default();
+    let config = teddy_config::Config::default();
 
     Teddy {
-      editor: Editor::new(action_sender.clone()),
+      editor: Editor::default(),
       renderer: Renderer::with_backend(tui, config),
       action_receiver,
       action_sender,
@@ -60,8 +40,8 @@ impl Teddy {
     }
   }
 
-  pub fn init(&mut self, args: Argv) -> crate::prelude::Result<()> {
-    self.editor.frames.add_window();
+  pub fn init(&mut self, _args: Argv) -> crate::prelude::Result<()> {
+    self.editor.frames.add_window().map(|_| ())
     //if let Some(path) = args.commands.first() {
     //  let path_buf: Box<Path> = Path::new(path).into();
     //
@@ -75,7 +55,6 @@ impl Teddy {
     //  let _placeholder = PlaceholderBuffer::default();
     //  //self.action_sender.send(Action::OpenBuffer(Box::new(placeholder)))?;
     //}
-    Ok(())
   }
 }
 impl EventLoop for Teddy {
@@ -126,7 +105,7 @@ impl Teddy {
       Event::Crossterm(CrosstermEvent::Resize(x, y)) => {
         Some(Vec::from_iter([Action::Resize(x, y)]))
       }
-      Event::Crossterm(CrosstermEvent::Mouse(mouse)) => None,
+      Event::Crossterm(CrosstermEvent::Mouse(_mouse)) => None,
       Event::Render => None,
       //Event::EventStreamError(err) => {
       //  // TODO: For now

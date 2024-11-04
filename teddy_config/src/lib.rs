@@ -1,8 +1,8 @@
 use ratatui::style::Color;
 
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 pub struct Config {
-  theme: ThemeConfig,
+  pub theme: ThemeConfig,
 }
 
 #[derive(Clone, Copy)]

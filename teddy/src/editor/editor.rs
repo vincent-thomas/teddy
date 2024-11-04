@@ -1,9 +1,5 @@
-use std::io::Stdout;
-
 use crossterm::event::KeyEvent;
-use ratatui::{prelude::*, Terminal};
 use teddy_core::{action::Action, component::Component};
-use tokio::sync::mpsc::UnboundedSender;
 
 use crate::{
   frame::manager::FrameManager,
@@ -11,6 +7,7 @@ use crate::{
   prelude::Result,
 };
 
+#[derive(Default)]
 pub struct Editor {
   pub frames: FrameManager,
 
@@ -26,7 +23,7 @@ impl Editor {
     for item in result {
       let action = match item {
         InputResult::Insert(test) => {
-          if let Some(active_frame) = self.frames.active_frame() {
+          if let Some(active_frame) = self.frames.active_frame_mut() {
             active_frame.insert(test).unwrap();
           }
           None
@@ -68,17 +65,17 @@ impl Editor {
   }
 }
 impl Editor {
-  pub fn new(sender: UnboundedSender<Action>) -> Self {
-    tracing::info!("Initiating Editor");
-
-    let frames = FrameManager::new(sender.clone());
-
-    Self {
-      frames,
-      input_resolver: InputResolverV2::default(),
-      //sender,
-    }
-  }
+  //pub fn new() -> Self {
+  //  tracing::info!("Initiating Editor");
+  //
+  //  let frames = FrameManager::new(sender.clone());
+  //
+  //  Self {
+  //    frames,
+  //    input_resolver: InputResolverV2::default(),
+  //    //sender,
+  //  }
+  //}
 
   pub fn replace_active_buffer(&mut self, _buffer: Box<dyn Component>) -> Result<()> {
     let manager = &mut self.frames;

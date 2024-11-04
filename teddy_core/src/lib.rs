@@ -7,6 +7,5 @@ pub trait EventLoop {
 
 pub mod action;
 pub mod buffer;
-mod commands;
 pub mod component;
 pub mod input_mode;

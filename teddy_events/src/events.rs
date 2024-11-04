@@ -26,7 +26,7 @@ use crate::crossterm::crossterm_stream;
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 enum EventName {
   Crossterm,
-  EventStreamError,
+  //EventStreamError,
   Render,
 }
 

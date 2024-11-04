@@ -1,5 +1,3 @@
-pub mod file_picker;
-
 //use crate::{buffers::Buffer, prelude::Result};
 //use crossterm::event::{KeyEvent, MouseEvent};
 //use ratatui::{layout::Rect, Frame};

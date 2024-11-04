@@ -1,17 +1,15 @@
 use core::ops::Range;
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
-use std::{sync::Arc, time::Duration};
-use tokio::task;
 
-use super::{commands::CommandManager, inputresolver::InputResult, utils::validate_macro_label};
+use super::{commands::CommandManager, inputresolver::InputResult};
 use teddy_core::{
-  action::{Action, Notification, NotificationLevel, Spinner},
-  input_mode::{InputMode, VisualSelection},
+  action::{Action, Notification, NotificationLevel},
+  input_mode::InputMode,
 };
 
 pub struct InputManager {
   pub input_mode: InputMode,
-  command_manager: CommandManager,
+  pub command_manager: CommandManager,
 
   pub master_buffer: Vec<KeyEvent>,
   latest_index: i64,
@@ -51,10 +49,15 @@ impl InputManager {
   fn simple_keybindings_normal(&mut self, input: KeyEvent) -> Option<Vec<InputResult>> {
     match (input.modifiers, input.code) {
       (KeyModifiers::CONTROL, KeyCode::Char('c')) => {
-        Some(vec![InputResult::CausedAction(Action::Quit)])
+        let notification = Notification::new(
+          NotificationLevel::Fail,
+          "Press ':q' in normal mode to quit teddy".to_string(),
+        );
+        Some(vec![InputResult::CausedAction(Action::AttachNotification(notification, 6))])
       }
       (KeyModifiers::CONTROL, KeyCode::Char('s')) => {
-        let mut notification = Notification::new(NotificationLevel::Info, "Saved file".to_string());
+        // Om texten ändras, ändra testet också
+        let notification = Notification::new(NotificationLevel::Info, "Saved file".to_string());
         Some(vec![
           InputResult::CausedAction(Action::WriteActiveBuffer),
           InputResult::CausedAction(Action::AttachNotification(notification, 2)),
@@ -63,7 +66,6 @@ impl InputManager {
       (KeyModifiers::NONE, KeyCode::Char('i')) => {
         self.input_mode = InputMode::Insert;
         None
-        //Some(vec![InputResult::CausedAction(Action::ChangeMode(EditorMode::Insert))])
       }
       (KeyModifiers::NONE, KeyCode::Char(':')) => {
         self.input_mode = InputMode::Command(teddy_core::input_mode::CommandModeData {
@@ -71,26 +73,10 @@ impl InputManager {
           value: ropey::Rope::default(),
         });
         None
-        //Some(vec![InputResult::CausedAction(Action::ChangeMode(EditorMode::Command))])
       }
       (KeyModifiers::NONE, KeyCode::Char('v')) => {
         panic!("Get cursor here");
-        self.input_mode = InputMode::Visual(VisualSelection::FromTo(0, 0));
-        None
       }
-
-      //(KeyModifiers::NONE, KeyCode::Char('l')) => {
-      //  Some(vec![InputResult::CursorIntent(CursorMovement::Right)])
-      //}
-      //(KeyModifiers::NONE, KeyCode::Char('k')) => {
-      //  Some(vec![InputResult::CursorIntent(CursorMovement::Up)])
-      //}
-      //(KeyModifiers::NONE, KeyCode::Char('j')) => {
-      //  Some(vec![InputResult::CursorIntent(CursorMovement::Down)])
-      //}
-      //(KeyModifiers::NONE, KeyCode::Char('h')) => {
-      //  Some(vec![InputResult::CursorIntent(CursorMovement::Left)])
-      //}
       _ => None,
     }
   }
@@ -102,14 +88,15 @@ impl InputManager {
 
         None
       }
-      //Some(vec![InputResult::CausedAction(Action::ChangeMode(EditorMode::Normal))]),
       _ => Some(vec![InputResult::Insert(input)]),
     }
   }
 
   fn simple_keybindings_command(&mut self, input: KeyEvent) -> Option<Vec<InputResult>> {
     if input.modifiers != KeyModifiers::NONE {
-      panic!("Not valid");
+      let notification =
+        Notification::new(NotificationLevel::Error, "Only characters are accepted".to_string());
+      return Some(vec![InputResult::CausedAction(Action::AttachNotification(notification, 2))]);
     }
     let cmd_data = match &mut self.input_mode {
       InputMode::Command(data) => data,
@@ -160,7 +147,7 @@ impl InputManager {
             Ok(v) => v,
             Err(v) => {
               let not = Notification::new(NotificationLevel::Error, format!("Error: '{:?}'", v));
-              Some(Vec::from_iter([Action::AttachNotification(not, 8)]))
+              Some(vec![Action::AttachNotification(not, 8)])
             }
           }
           .unwrap_or_default();
@@ -169,7 +156,7 @@ impl InputManager {
           Some(result.into_iter().map(|v| InputResult::CausedAction(v)).collect())
         } else {
           let not = Notification::new(
-            NotificationLevel::Info,
+            NotificationLevel::Fail,
             format!("Command '{}' doesn't exist", cmd_data.value),
           );
 

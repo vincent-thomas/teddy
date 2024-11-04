@@ -1,5 +1,4 @@
 use ratatui::{
-  buffer::Buffer,
   layout::{Constraint, Layout, Rect},
   style::Style,
   widgets::Widget,
@@ -17,7 +16,9 @@ pub struct StatusBar<'a> {
 }
 
 impl StatusBar<'_> {
-  pub fn ui(&self, area: Rect, buf: &mut Buffer) {
+  pub fn ui(&self, area: Rect, frame: &mut Frame<'_>) {
+    let buf = frame.buffer_mut();
+
     let input_mode = InputModeRenderer(self.editor.input_resolver.input_manager.editor_mode());
     let bar_layout = Layout::horizontal([Constraint::Length(8)]).split(area);
 

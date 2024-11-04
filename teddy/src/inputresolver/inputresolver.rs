@@ -13,7 +13,7 @@ enum MacroCheckReturn {
   Ignore,
   Some(Vec<InputResult>),
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum InputResult {
   Insert(KeyEvent),
   CausedAction(Action),
@@ -101,6 +101,7 @@ impl InputResolverV2 {
 #[cfg(test)]
 mod tests {
   use crossterm::event::KeyModifiers;
+  use teddy_core::action::{Notification, NotificationLevel};
 
   use super::*;
   #[test]
@@ -175,7 +176,6 @@ mod tests {
       KeyEvent::new(KeyCode::Char('s'), KeyModifiers::NONE),
       KeyEvent::new(KeyCode::Char('t'), KeyModifiers::NONE),
       KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE),
-      KeyEvent::new(KeyCode::Char('s'), KeyModifiers::CONTROL),
       KeyEvent::new(KeyCode::Char('q'), KeyModifiers::NONE),
       KeyEvent::new(KeyCode::Char('@'), KeyModifiers::NONE),
       KeyEvent::new(KeyCode::Char('a'), KeyModifiers::NONE),
@@ -211,7 +211,6 @@ mod tests {
         KeyModifiers::NONE,
       ))])),
       None,
-      Some(Vec::from_iter([InputResult::CausedAction(Action::WriteActiveBuffer)])),
       None,
       None,
       Some(Vec::from_iter([
@@ -219,7 +218,6 @@ mod tests {
         InputResult::Insert(KeyEvent::new(KeyCode::Char('e'), KeyModifiers::NONE)),
         InputResult::Insert(KeyEvent::new(KeyCode::Char('s'), KeyModifiers::NONE)),
         InputResult::Insert(KeyEvent::new(KeyCode::Char('t'), KeyModifiers::NONE)),
-        InputResult::CausedAction(Action::WriteActiveBuffer),
       ])),
       None,
     ];
@@ -238,7 +236,7 @@ mod tests {
       let left = outputs[index].clone();
       let right = test_case[index].clone();
       if left != right {
-        panic!("left: {:#?}\nright: {:#?}", left, right);
+        panic!("index: {index} left: {:#?}\nright: {:#?}", left, right);
       }
     }
   }

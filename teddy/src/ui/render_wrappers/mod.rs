@@ -28,8 +28,7 @@ impl Widget for InputModeRenderer<'_> {
     let text = self.0.to_string();
     let spacing = (area.width as usize - text.len()) / 2;
 
-    let mut text =
-      Text::styled(format!("{space}{}{space}", text, space = " ".repeat(spacing)), style);
+    let text = Text::styled(format!("{space}{}{space}", text, space = " ".repeat(spacing)), style);
 
     text.render(area, buf);
   }

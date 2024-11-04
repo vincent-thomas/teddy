@@ -1,12 +1,5 @@
-use std::{
-  future::Future,
-  pin::Pin,
-  sync::{Arc, Mutex, RwLock},
-};
-
-use chrono::{Date, DateTime, NaiveDate, NaiveDateTime, Utc};
+use chrono::Utc;
 use teddy_core::action::Notification;
-use tokio::task;
 
 #[derive(Default, Debug, Clone)]
 pub struct NotificationManager {

@@ -1,4 +1,4 @@
-use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
+use chrono::Utc;
 use ratatui::{
   layout::Rect,
   style::{Color, Style},
@@ -10,11 +10,11 @@ use teddy_core::action::NotificationLevel;
 use crate::frame::notification_manager::NotificationManager;
 pub struct NotificationManagerRenderer(pub NotificationManager);
 
-impl Widget for NotificationManagerRenderer {
-  fn render(self, area: ratatui::prelude::Rect, buf: &mut ratatui::prelude::Buffer)
-  where
-    Self: Sized,
-  {
+impl NotificationManagerRenderer {
+  pub fn ui(self, frame: &mut ratatui::Frame<'_>) {
+    let area = frame.size();
+    let buf = frame.buffer_mut();
+
     let rendered_text: Vec<Line> = self
       .0
       .vec
@@ -51,7 +51,7 @@ impl Widget for NotificationManagerRenderer {
       })
       .collect();
 
-    let testing = Text::from(rendered_text.clone());
+    let text = Text::from(rendered_text.clone());
 
     let height = rendered_text.len();
     let width = 40;
@@ -59,6 +59,6 @@ impl Widget for NotificationManagerRenderer {
     let area =
       Rect::new(area.width - width as u16, area.height - height as u16 - 2, width, height as u16);
 
-    testing.render(area, buf);
+    text.render(area, buf);
   }
 }
