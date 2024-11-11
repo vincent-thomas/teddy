@@ -1,5 +1,8 @@
 use core::ops::Range;
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+use std::{collections::HashMap, error::Error};
+
+use crate::frame::manager::FrameManager;
 
 use super::{commands::CommandManager, inputresolver::InputResult, CursorMovement};
 use teddy_core::{
@@ -10,9 +13,93 @@ use teddy_core::{
 pub struct InputManager {
   pub input_mode: InputMode,
   pub command_manager: CommandManager,
+  pub keybind_manager: KeybindManager,
 
   pub master_buffer: Vec<KeyEvent>,
   latest_index: i64,
+}
+
+struct KeyBindRegistryKey {
+  mode: InputMode,
+}
+
+#[derive(Hash, PartialEq, Eq)]
+enum KeyBindKey {
+  // Single key keybinding. They should be paired with a CTRL.
+  ActionKey(KeyCode),
+  KeyCombination(KeyCode, Option<KeyCode>),
+}
+
+#[derive(Default)]
+pub struct KeybindManager {
+  registry: HashMap<KeyBindKey, Box<dyn KeyBind>>,
+  bind_buffer: Vec<KeyEvent>,
+}
+
+struct SaveKeybind;
+
+impl KeyBind for SaveKeybind {
+  fn act(&mut self, ctx: &mut Context) -> Result<Option<Vec<Action>>, Box<dyn Error>> {
+    let notification = Notification::new(NotificationLevel::Info, "Saved buffer.".to_string());
+    let actions =
+      Vec::from_iter([Action::WriteActiveBuffer, Action::AttachNotification(notification, 2)]);
+    return Ok(Some(actions));
+  }
+}
+
+impl KeybindManager {
+  pub fn setup(&mut self) {
+    let key = KeyBindKey::ActionKey(KeyCode::Char('s'));
+    self.registry.insert(key, Box::new(SaveKeybind));
+  }
+
+  fn resolve_bindbuffer(&mut self, context: &mut Context) -> Option<Vec<Action>> {
+    if self.bind_buffer.len() == 1 && self.bind_buffer[0].modifiers == KeyModifiers::CONTROL {
+      if let KeyCode::Char(char) = self.bind_buffer[0].code {
+        let key_bind_key = KeyBindKey::ActionKey(KeyCode::Char(char));
+
+        if let Some(thing) = self.registry.get_mut(&key_bind_key) {
+          let result = thing.act(context);
+
+          return result.unwrap();
+        }
+        return None;
+      }
+      return None;
+    }
+    None
+  }
+
+  /// Fetches command and if found, runs it.
+  /// # Returns:
+  /// - Some(vec![Action]): If action found, return its actions
+  /// - None: No action was found
+  pub fn match_keybind(
+    &mut self,
+    key_event: KeyEvent,
+    context: &mut Context,
+  ) -> Option<Vec<Action>> {
+    if key_event.modifiers != KeyModifiers::NONE && self.bind_buffer.len() == 1 {
+      let notification = Notification::new(NotificationLevel::Error, "wtf".to_string());
+      let actions = Vec::from_iter([Action::AttachNotification(notification, 5)]);
+
+      self.bind_buffer.clear();
+      return Some(actions);
+    }
+
+    self.bind_buffer.push(key_event);
+
+    self.resolve_bindbuffer(context)
+  }
+}
+
+pub struct Context {
+  input_mode: InputMode,
+  frames: FrameManager,
+}
+
+trait KeyBind {
+  fn act(&mut self, ctx: &mut Context) -> Result<Option<Vec<Action>>, Box<dyn Error>>;
 }
 
 impl Default for InputManager {
@@ -22,6 +109,7 @@ impl Default for InputManager {
 
     Self {
       input_mode: InputMode::default(),
+      keybind_manager: KeybindManager::default(),
       command_manager,
       master_buffer: Vec::default(),
       latest_index: -1,

@@ -104,8 +104,8 @@ let testing = \"\";
     assert_eq!(cursor.x, 0);
     assert_eq!(cursor.y, 1);
 
-    cursor.move_right(&buffer);
-    cursor.move_right(&buffer);
+    cursor.move_right(&buffer, &InputMode::Normal);
+    cursor.move_right(&buffer, &InputMode::Normal);
 
     cursor.move_down(&buffer);
 
