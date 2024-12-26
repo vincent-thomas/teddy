@@ -26,7 +26,7 @@ struct KeyBindRegistryKey {
 #[derive(Hash, PartialEq, Eq)]
 enum KeyBindKey {
   // Single key keybinding. They should be paired with a CTRL.
-  ActionKey(KeyCode),
+  ActionKey(char),
   KeyCombination(KeyCode, Option<KeyCode>),
 }
 
@@ -47,27 +47,80 @@ impl KeyBind for SaveKeybind {
   }
 }
 
+enum MatchKeyBindResult {
+  None,
+  CommandDoesntExist,
+  Some(Vec<Action>),
+}
+
 impl KeybindManager {
   pub fn setup(&mut self) {
-    let key = KeyBindKey::ActionKey(KeyCode::Char('s'));
+    let key = KeyBindKey::ActionKey('s');
     self.registry.insert(key, Box::new(SaveKeybind));
   }
 
-  fn resolve_bindbuffer(&mut self, context: &mut Context) -> Option<Vec<Action>> {
-    if self.bind_buffer.len() == 1 && self.bind_buffer[0].modifiers == KeyModifiers::CONTROL {
-      if let KeyCode::Char(char) = self.bind_buffer[0].code {
-        let key_bind_key = KeyBindKey::ActionKey(KeyCode::Char(char));
-
-        if let Some(thing) = self.registry.get_mut(&key_bind_key) {
-          let result = thing.act(context);
-
-          return result.unwrap();
-        }
-        return None;
-      }
+  fn check_action_key(&self) -> Option<char> {
+    if !self.bind_buffer.is_empty() && self.bind_buffer.len() != 1 {
       return None;
     }
-    None
+
+    let current_char = self.bind_buffer[0];
+
+    if current_char.modifiers != KeyModifiers::CONTROL {
+      return None;
+    };
+
+    let KeyCode::Char(action_key) = current_char.code else {
+      return None;
+    };
+
+    return Some(action_key);
+  }
+
+  fn resolve_action_key(
+    &mut self,
+    key_event: KeyEvent,
+    context: &mut Context,
+  ) -> MatchKeyBindResult {
+    if self.bind_buffer.len() == 1 && key_event.modifiers == KeyModifiers::CONTROL {
+      if let Some(action_key) = self.check_action_key() {
+        return match self.registry.get(&KeyBindKey::ActionKey(action_key)) {
+          Some(stuff) => {
+            let test = stuff.act(context).unwrap().unwrap_or_default();
+            MatchKeyBindResult::Some(test)
+          }
+          None => MatchKeyBindResult::None,
+        };
+      };
+    }
+    //if let Some(action_key) = self.check_action_key() {
+    //  let key_key = KeyBindKey::ActionKey(action_key);
+    //
+    //  if let Some(command) = self.registry.get_mut(&key_key) {
+    //    let result = command.act(context).unwrap();
+    //
+    //    return result;
+    //  };
+    //
+    //  //let result = self.registry.get_mut(&key_key);
+    //};
+    ////if !self.bind_buffer.is_empty() && self.bind_buffer.last().unwrap().modifiers == KeyModifiers::CONTROL {
+    //
+    //}
+    //  if self.bind_buffer.len() == 1 && self.bind_buffer[0].modifiers == KeyModifiers::CONTROL {
+    //    if let KeyCode::Char(char) = self.bind_buffer[0].code {
+    //      let key_bind_key = KeyBindKey::ActionKey(KeyCode::Char(char));
+    //
+    //      if let Some(thing) = self.registry.get_mut(&key_bind_key) {
+    //        let result = thing.act(context);
+    //
+    //        return result.unwrap();
+    //      }
+    //      return None;
+    //    }
+    //    return None;
+    //  }
+    //  None
   }
 
   /// Fetches command and if found, runs it.
@@ -79,26 +132,28 @@ impl KeybindManager {
     key_event: KeyEvent,
     context: &mut Context,
   ) -> Option<Vec<Action>> {
-    if key_event.modifiers != KeyModifiers::NONE && self.bind_buffer.len() == 1 {
-      let notification = Notification::new(NotificationLevel::Error, "wtf".to_string());
-      let actions = Vec::from_iter([Action::AttachNotification(notification, 5)]);
+    self.bind_buffer.push(key_event.clone());
+    if self.bind_buffer.len() == 1 && key_event.modifiers == KeyModifiers::CONTROL {
+      let KeyCode::Char(char) = key_event.code else { panic!("what the hell") };
 
-      self.bind_buffer.clear();
-      return Some(actions);
-    }
+      let key = KeyBindKey::ActionKey(char);
+      if let Some(thing) = self.registry.get_mut(&key) {
+        return thing.act(context).unwrap();
+      } else {
+        panic!("what the hell")
+      }
+    };
 
-    self.bind_buffer.push(key_event);
-
-    self.resolve_bindbuffer(context)
+    None
   }
 }
 
-pub struct Context {
-  input_mode: InputMode,
-  frames: FrameManager,
+pub struct Context<'a> {
+  pub input_mode: &'a mut InputMode,
+  pub frames: &'a mut FrameManager,
 }
 
-trait KeyBind {
+pub trait KeyBind {
   fn act(&mut self, ctx: &mut Context) -> Result<Option<Vec<Action>>, Box<dyn Error>>;
 }
 

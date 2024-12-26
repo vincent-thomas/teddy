@@ -3,7 +3,7 @@ use teddy_core::{action::Action, buffer::Buffer, component::Component};
 
 use crate::{
   frame::manager::FrameManager,
-  inputresolver::{CursorMovement, InputResolverV2, InputResult},
+  inputresolver::{input_manager::Context, CursorMovement, InputResolverV2, InputResult},
   prelude::Result,
 };
 
@@ -18,6 +18,12 @@ pub struct Editor {
 // Event Loop
 impl Editor {
   pub fn keyevent(&mut self, event: KeyEvent) -> Option<Vec<Action>> {
+    let mut context = Context {
+      frames: &mut self.frames,
+      input_mode: &mut self.input_resolver.input_manager.input_mode,
+    };
+
+    self.input_resolver.input_manager.keybind_manager.match_keybind(event, &mut context);
     let result = self.input_resolver.input(event).unwrap_or_default();
     let mut stuff = Vec::new();
     for item in result {
