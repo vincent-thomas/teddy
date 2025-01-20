@@ -14,22 +14,18 @@ pub enum InputMode {
 }
 
 #[derive(PartialEq, Debug, Clone, Copy)]
-pub enum VisualSelection {
-  FromTo(usize, usize),
-  Lines(usize, usize),
-  Diagonal((usize, usize), (usize, usize)),
-}
+pub struct VisualSelection(usize, usize);
 
 impl Default for VisualSelection {
   fn default() -> Self {
-    VisualSelection::Lines(0, 0)
+    unreachable!()
   }
 }
 
 #[derive(Default, PartialEq, Debug, Clone)]
 pub struct CommandModeData {
-  pub value: Rope,
-  pub cursor: u8,
+  value: Rope,
+  cursor: u8,
 }
 
 impl Display for InputMode {
@@ -42,5 +38,19 @@ impl Display for InputMode {
     };
 
     f.write_str(text)
+  }
+}
+
+impl CommandModeData {
+  pub fn insert(&mut self, char: char) {
+    self.value.insert_char(self.cursor.into(), char);
+  }
+
+  pub fn value(&self) -> &ropey::Rope {
+    &self.value
+  }
+
+  pub fn cursor(&self) -> u8 {
+    self.cursor
   }
 }

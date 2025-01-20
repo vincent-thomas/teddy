@@ -1,32 +1,29 @@
 use crossterm::event::KeyEvent;
-use teddy_core::{action::Action, buffer::Buffer, component::Component};
+use teddy_core::{action::Action, component::Component};
 
 use crate::{
   frame::manager::FrameManager,
-  inputresolver::{input_manager::Context, CursorMovement, InputResolverV2, InputResult},
+  inputresolver::{
+    context::Context, input::input_manager::InputResult, CursorMovement, MacroResolver,
+  },
   prelude::Result,
 };
 
 #[derive(Default)]
 pub struct Editor {
   pub frames: FrameManager,
-
-  pub input_resolver: InputResolverV2,
-  //sender: UnboundedSender<Action>,
+  pub macro_key_resolver: MacroResolver,
 }
 
 // Event Loop
 impl Editor {
   pub fn keyevent(&mut self, event: KeyEvent) -> Option<Vec<Action>> {
-    let mut context = Context {
-      frames: &mut self.frames,
-      input_mode: &mut self.input_resolver.input_manager.input_mode,
-    };
+    let context =
+      Context::new(self.macro_key_resolver.input_manager.editor_mode_mut(), &mut self.frames);
 
-    self.input_resolver.input_manager.keybind_manager.match_keybind(event, &mut context);
-    let result = self.input_resolver.input(event).unwrap_or_default();
+    //self.input_resolver.input_manager.keybind_manager.match_keybind(event, &mut context);
     let mut stuff = Vec::new();
-    for item in result {
+    for item in self.macro_key_resolver.input(event).unwrap_or(Vec::default()) {
       let action = match item {
         InputResult::Insert(test) => {
           if let Some(active_frame) = self.frames.active_frame_mut() {
@@ -36,33 +33,22 @@ impl Editor {
         }
         InputResult::CausedAction(action) => Some(action),
         InputResult::CursorIntent(test) => {
-          let Some(active_frame) = self.frames.active_frame_mut() else {
-            return None;
-          };
+          let active_frame = self.frames.active_frame_mut()?;
           let buff = active_frame.buff();
           match test {
-            CursorMovement::Down => {
-              active_frame.cursor.cursor.move_down(&buff);
-            }
-            CursorMovement::Up => {
-              active_frame.cursor.cursor.move_up(&buff);
-            }
-            CursorMovement::Left => {
-              active_frame.cursor.cursor.move_left(&buff);
-            }
+            CursorMovement::Down => active_frame.cursor.cursor.move_down(&buff),
+            CursorMovement::Up => active_frame.cursor.cursor.move_up(&buff),
+            CursorMovement::Left => active_frame.cursor.cursor.move_left(),
             CursorMovement::Right => {
-              active_frame
-                .cursor
-                .cursor
-                .move_right(&buff, &self.input_resolver.input_manager.input_mode);
+              let mode = self.macro_key_resolver.input_manager.editor_mode();
+              active_frame.cursor.cursor.move_right(&buff, mode)
             }
-            CursorMovement::Readjust => {
-              active_frame.cursor.cursor.readjust(&buff);
-            }
+            CursorMovement::Readjust => active_frame.cursor.cursor.readjust(&buff),
             CursorMovement::Custom(_) => todo!(),
           }
           None
         }
+        InputResult::ChangeInputMode(data) => todo!(),
       };
 
       if let Some(existing_action) = action {
@@ -78,18 +64,6 @@ impl Editor {
   }
 }
 impl Editor {
-  //pub fn new() -> Self {
-  //  tracing::info!("Initiating Editor");
-  //
-  //  let frames = FrameManager::new(sender.clone());
-  //
-  //  Self {
-  //    frames,
-  //    input_resolver: InputResolverV2::default(),
-  //    //sender,
-  //  }
-  //}
-
   pub fn replace_active_buffer(&mut self, _buffer: Box<dyn Component>) -> Result<()> {
     let manager = &mut self.frames;
     if let Some(_active) = manager.active_frame() {

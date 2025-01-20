@@ -3,3 +3,5 @@ build:
 
 run:
   cargo run -q
+test:
+  cargo nextest r

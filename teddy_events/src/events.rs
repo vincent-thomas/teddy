@@ -6,27 +6,9 @@ use tokio_stream::{wrappers::IntervalStream, StreamMap};
 
 use crate::crossterm::crossterm_stream;
 
-//macro_rules! create_enums {
-//    ($name_keys:ident, $name_kv:ident, { $($key:ident $(= $value:ident)?),* $(,)? }) => {
-//
-//        // First enum with only keys as unit variants.
-//        #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
-//        enum $name_keys {
-//            $($key),*
-//        }
-//
-//        // Second enum with keys as tuple variants containing values.
-//        #[derive(Debug)]
-//        pub enum $name_kv {
-//            $($key($value)),*
-//        }
-//    };
-//}
-
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 enum EventName {
   Crossterm,
-  //EventStreamError,
   Render,
 }
 

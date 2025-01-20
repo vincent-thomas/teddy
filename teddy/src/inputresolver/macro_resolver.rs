@@ -1,23 +1,17 @@
 use std::collections::HashMap;
 
 use super::{
-  input_manager::InputManager,
+  input::input_manager::{InnerInputManager, InputResult},
   utils::{self, KeyEventExt as _},
 };
 use crossterm::event::{KeyCode, KeyEvent};
 
-use teddy_core::{action::Action, input_mode::InputMode};
+use teddy_core::input_mode::InputMode;
 
 enum MacroCheckReturn {
   Continue,
   Ignore,
   Some(Vec<InputResult>),
-}
-#[derive(Debug, PartialEq, Clone)]
-pub enum InputResult {
-  Insert(KeyEvent),
-  CausedAction(Action),
-  CursorIntent(CursorMovement),
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -31,33 +25,34 @@ pub enum CursorMovement {
   Custom(usize),
 }
 
-enum MacroStoreTrackerV2 {
+enum StoreTrackerState {
   Recording { registry: Option<char> },
   Replaying,
 }
 
 #[derive(Default)]
-pub struct InputResolverV2 {
+pub struct MacroResolver {
   macro_stores: HashMap<char, (usize, Option<usize>)>,
-  macro_store_tracker: Option<MacroStoreTrackerV2>,
+  store_tracker_state: Option<StoreTrackerState>,
+  master_buffer: Vec<KeyEvent>,
+  latest_index: Option<usize>,
 
-  pub input_manager: InputManager,
+  pub input_manager: InnerInputManager,
 }
 
-impl InputResolverV2 {
+impl MacroResolver {
   fn check_macro_insertion(&mut self, key: KeyEvent) -> MacroCheckReturn {
-    let mode = self.input_manager.editor_mode();
-    if *mode != InputMode::Normal {
+    if *self.input_manager.editor_mode() != InputMode::Normal {
       return MacroCheckReturn::Continue;
     }
-    let Some(macro_state) = self.macro_store_tracker.as_mut() else {
+    let Some(macro_state) = self.store_tracker_state.as_mut() else {
       return match key.code {
         KeyCode::Char('q') => {
-          self.macro_store_tracker = Some(MacroStoreTrackerV2::Recording { registry: None });
+          self.store_tracker_state = Some(StoreTrackerState::Recording { registry: None });
           MacroCheckReturn::Ignore
         }
         KeyCode::Char('@') => {
-          self.macro_store_tracker = Some(MacroStoreTrackerV2::Replaying);
+          self.store_tracker_state = Some(StoreTrackerState::Replaying);
           MacroCheckReturn::Ignore
         }
         _ => MacroCheckReturn::Continue,
@@ -65,45 +60,44 @@ impl InputResolverV2 {
     };
 
     match macro_state {
-      MacroStoreTrackerV2::Recording { registry } if registry.is_none() => {
+      StoreTrackerState::Recording { registry } if registry.is_none() => {
         let macro_label = utils::validate_macro_label(key).expect("Invalid Macro Label");
         *registry = Some(macro_label);
-        self.macro_stores.insert(macro_label, (self.input_manager.index() + 1, None));
+        self.macro_stores.insert(macro_label, (self.latest_index.unwrap() + 1, None));
         MacroCheckReturn::Ignore
       }
-      MacroStoreTrackerV2::Recording { registry } if key.initiated_recording() => {
+      StoreTrackerState::Recording { registry } if key.initiated_recording() => {
         let _macro = self.macro_stores.get_mut(&registry.unwrap());
-        _macro.unwrap().1 = Some(self.input_manager.index());
+        _macro.unwrap().1 = Some(self.latest_index.unwrap());
 
-        self.macro_store_tracker = None;
+        self.store_tracker_state = None;
         MacroCheckReturn::Ignore
       }
       // Här kommer den ju att aktivt recorda genom att vänta på när den är klar.
-      MacroStoreTrackerV2::Recording { registry: _ } => MacroCheckReturn::Continue,
-      MacroStoreTrackerV2::Replaying => {
+      StoreTrackerState::Recording { registry: _ } => MacroCheckReturn::Continue,
+      StoreTrackerState::Replaying => {
         let macro_label = utils::validate_macro_label(key).expect("Invalid Macro Label");
         let _macro = self.macro_stores.get(&macro_label);
-        self.macro_store_tracker = None;
+        self.store_tracker_state = None;
 
         let (start_index, end_index) = _macro.expect("Macro has not been finished recording");
         let end_index = end_index.expect("Macro has not been finished recording");
 
-        let store_slice = self.input_manager.get_store_slice(*start_index..end_index).to_vec();
-
-        let nice: Vec<InputResult> =
+        let store_slice = self.master_buffer[*start_index..end_index].to_vec();
+        let input_results: Vec<InputResult> =
           store_slice.iter().filter_map(|v| self.input_manager.input(*v)).flatten().collect();
 
-        if nice.is_empty() {
+        if input_results.is_empty() {
           MacroCheckReturn::Ignore
         } else {
-          MacroCheckReturn::Some(nice)
+          MacroCheckReturn::Some(input_results)
         }
       }
     }
   }
 
   pub fn input(&mut self, key: KeyEvent) -> Option<Vec<InputResult>> {
-    self.input_manager.push_key(key);
+    tracing::trace!("event: {:#?}", &key);
     match self.check_macro_insertion(key) {
       MacroCheckReturn::Continue => self.input_manager.input(key),
       MacroCheckReturn::Some(v) => Some(v),
@@ -111,15 +105,15 @@ impl InputResolverV2 {
     }
   }
 }
+
 #[cfg(test)]
 mod tests {
-  use crossterm::event::KeyModifiers;
-  use teddy_core::action::{Notification, NotificationLevel};
-
   use super::*;
+  use crossterm::event::KeyModifiers;
+
   #[test]
   fn test_mode_switching_under_record() {
-    let mut input_resolver = InputResolverV2::default();
+    let mut input_resolver = MacroResolver::default();
 
     let inputs: Vec<KeyEvent> = Vec::from_iter([
       KeyEvent::new(KeyCode::Char('q'), KeyModifiers::NONE),
@@ -178,7 +172,7 @@ mod tests {
 
   #[test]
   fn inputresolver() {
-    let mut input_resolver = InputResolverV2::default();
+    let mut input_resolver = MacroResolver::default();
 
     let inputs: Vec<KeyEvent> = Vec::from_iter([
       KeyEvent::new(KeyCode::Char('q'), KeyModifiers::NONE),

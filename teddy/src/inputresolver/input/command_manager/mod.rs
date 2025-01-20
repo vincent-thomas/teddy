@@ -1,15 +1,17 @@
-mod echo;
-pub mod quit;
-mod write;
-mod write_and_quit;
-
 use std::{collections::HashMap, error::Error};
 
-use echo::EchoCommand;
-use quit::QuitCommand;
-use teddy_core::action::Action;
-use write::WriteCommand;
-use write_and_quit::WriteAndQuitCommand;
+mod commands;
+
+use commands::echo::EchoCommand;
+use commands::quit::QuitCommand;
+use commands::write::WriteCommand;
+use commands::write_and_quit::WriteAndQuitCommand;
+
+use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+use teddy_core::action::{Action, Notification};
+use teddy_core::input_mode::{CommandModeData, InputMode};
+
+use super::input_manager::InputResult;
 
 pub trait Command {
   fn act(&mut self, query: &str) -> Result<Option<Vec<Action>>, Box<dyn Error>>;
@@ -20,8 +22,11 @@ struct CommandEntry {
   description: Option<String>,
 }
 
+/// Responsible for looking up, registering, removing commands that can be entered with the ":"
+/// prompt.
 #[derive(Default)]
 pub struct CommandManager {
+  // The cmd query (:[query]) isn't stored here because it's closely coupled with the enum EditorMode.
   registry: HashMap<String, CommandEntry>,
 }
 
@@ -52,12 +57,29 @@ impl CommandManager {
     );
   }
 
+  pub fn input(&mut self, cmd_data: &mut CommandModeData, keycode: KeyEvent) -> Vec<InputResult> {
+    match (keycode.modifiers, keycode.code) {
+      (KeyModifiers::CONTROL, KeyCode::Char('c')) | (KeyModifiers::NONE, KeyCode::Esc) => {
+        Vec::from_iter([InputResult::ChangeInputMode(InputMode::Normal)])
+      }
+      (KeyModifiers::NONE, KeyCode::Char(char)) => {
+        cmd_data.insert(char);
+        vec![]
+      }
+      (_, _) => {
+        let notification = Notification::error("Invalid input".into());
+        let action = Action::AttachNotification(notification, 10);
+        Vec::from_iter([InputResult::CausedAction(action)])
+      }
+    }
+  }
+
   pub fn query(&mut self, query: String) -> Option<&mut Box<dyn Command>> {
     let entries: Vec<(&String, &CommandEntry)> =
       self.registry.iter().filter(|v| v.0.starts_with(&query)).collect();
     let first = query.split("\n").next().expect("Is empty");
 
-    self.registry.get_mut(&first.to_string()).map(|v| &mut v.cmd)
+    self.registry.get_mut(first).map(|v| &mut v.cmd)
   }
 
   pub fn search(&self, query: String) -> Vec<(String, Option<String>)> {

@@ -1,6 +1,5 @@
+use crate::inputresolver::input::command_manager::Command;
 use teddy_core::action::Action;
-
-use super::Command;
 
 pub struct WriteAndQuitCommand;
 

@@ -8,8 +8,7 @@ pub struct Cursor {
 }
 
 impl Cursor {
-  pub fn move_left(&mut self, rope: &Rope) {
-    let line = rope.line(self.y);
+  pub fn move_left(&mut self) {
     if self.x > 0 {
       self.x -= 1;
     }
@@ -38,7 +37,6 @@ impl Cursor {
       self.x = 0;
       return;
     }
-    let line = rope.line(self.y);
     let line_before = rope.line(self.y - 1);
     let line_before_len = line_before.len_chars() - 1; // -1 for \n
 
@@ -56,9 +54,7 @@ impl Cursor {
     if self.y + 1 == rope.len_lines() {
       return;
     }
-    let line = rope.line(self.y);
     let line_after = rope.line(self.y + 1);
-
     let line_after_len = line_after.len_chars() - 1; // -1 for \n
 
     if line_after_len < self.x {

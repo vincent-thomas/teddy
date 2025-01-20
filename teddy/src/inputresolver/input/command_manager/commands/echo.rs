@@ -1,8 +1,7 @@
 use teddy_core::action::{Action, Notification, NotificationLevel};
 
-use super::Command;
-
 pub struct EchoCommand;
+use crate::inputresolver::input::command_manager::Command;
 
 impl Command for EchoCommand {
   fn act(&mut self, query: &str) -> Result<Option<Vec<Action>>, Box<dyn std::error::Error>> {

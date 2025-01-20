@@ -21,14 +21,19 @@ impl UnderBar<'_> {
     let buf = frame.buffer_mut();
     buf.set_style(area, Style::default().bg(self.config.background));
 
-    if let InputMode::Command(cmd_data) = &self.editor.input_resolver.input_manager.input_mode {
-      let string = format!(":{}", cmd_data.value);
+    if let InputMode::Command(cmd_data) = self.editor.macro_key_resolver.input_manager.editor_mode()
+    {
+      let string = format!(":{}", cmd_data.value());
       let text = Text::styled(string, Style::default().fg(self.config.foreground));
 
       text.render(area, buf);
 
-      let testing =
-        self.editor.input_resolver.input_manager.command_manager.search(cmd_data.value.to_string());
+      let testing = self
+        .editor
+        .macro_key_resolver
+        .input_manager
+        .command_manager
+        .search(cmd_data.value().to_string());
 
       if !testing.is_empty() {
         let area = Rect::new(area.x, area.y - testing.len() as u16 - 1, 40, testing.len() as u16);
@@ -60,7 +65,7 @@ impl UnderBar<'_> {
         buf.set_style(area, Style::default().bg(Color::DarkGray).fg(Color::Gray));
       }
 
-      Some((cmd_data.cursor as u16 + 1, area.y))
+      Some((cmd_data.cursor() as u16 + 1, area.y))
     } else {
       None
     }

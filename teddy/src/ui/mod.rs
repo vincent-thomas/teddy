@@ -41,8 +41,6 @@ fn draw(
   let mut framerenderer = FrameManagerRenderer { editor, config: &config };
   framerenderer.ui(layout[0], frame);
 
-  //let bar = StatusBar { editor, config: config.theme };
-  //bar.ui(layout[1], frame);
   let underbar = UnderBar { editor, config: config.theme };
   if let Some((x, y)) = underbar.ui(layout[1], frame) {
     frame.set_cursor(x, y)

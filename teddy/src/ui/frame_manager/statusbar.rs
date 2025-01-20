@@ -25,7 +25,7 @@ impl StatusBar<'_> {
 
     buf.set_style(area, Style::default().bg(self.config.background_secondary));
 
-    let input_mode = InputModeRenderer(self.editor.input_resolver.input_manager.editor_mode());
+    let input_mode = InputModeRenderer(self.editor.macro_key_resolver.input_manager.editor_mode());
     input_mode.render(bar_layout[0], buf);
 
     if let Some(frame) = self.editor.frames.active_frame() {

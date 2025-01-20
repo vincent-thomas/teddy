@@ -1,6 +1,6 @@
-pub mod commands;
-pub mod input_manager;
-mod inputresolver;
+pub mod context;
+pub mod input;
+mod macro_resolver;
 mod utils;
 
-pub use inputresolver::*;
+pub use macro_resolver::*;

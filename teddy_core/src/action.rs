@@ -5,16 +5,11 @@ use std::{fmt::Debug, path::PathBuf};
 pub enum Action {
   Quit,
 
-  // Crossterm actions
-  Resize(u16, u16),
+  Render,
   AttachNotification(Notification, u8),
-  //OpenBuffer(Box<dyn Component>),
-  //ReplaceActiveBuffer(Box<dyn Component>),
   CloseActiveBuffer,
   WriteActiveBuffer,
 
-  //AttachLSPToCurrentBuffer,
-  //DetachLSPFromBuffer { buffer_id: u16 },
   WriteDiagnostic(Diagnostic),
 }
 
@@ -59,6 +54,21 @@ impl Notification {
   pub fn new(level: NotificationLevel, message: String) -> Self {
     Notification { level, message }
   }
+  pub fn error(message: String) -> Self {
+    Notification { level: NotificationLevel::Error, message }
+  }
+  pub fn info(message: String) -> Self {
+    Notification { level: NotificationLevel::Info, message }
+  }
+  pub fn success(message: String) -> Self {
+    Notification { level: NotificationLevel::Success, message }
+  }
+  pub fn warn(message: String) -> Self {
+    Notification { level: NotificationLevel::Warn, message }
+  }
+  pub fn fail(message: String) -> Self {
+    Notification { level: NotificationLevel::Fail, message }
+  }
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -81,7 +91,7 @@ impl Debug for Action {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     match self {
       Action::Quit => write!(f, "Action::Quit"),
-      Action::Resize(x, y) => write!(f, "Action::Resize({}, {})", x, y),
+      Action::Render => write!(f, "Action::Render"),
       Action::AttachNotification(_, _) => write!(f, "Action::WriteErrorMessage"),
       //Action::ReplaceActiveBuffer(_) => write!(f, "Action::ReplaceActiveBuffer"),
       //Action::OpenBuffer(_) => write!(f, "Action::OpenBuffer"),

@@ -30,7 +30,10 @@
             rustc
             cargo-expand
             cargo-watch
+            cargo-nextest
             clippy
+
+            just
           ];
 
         };
